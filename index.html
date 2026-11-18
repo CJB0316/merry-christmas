@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#050b18" />
+<meta name="theme-color" content="#05070f" />
 <meta name="description" content="Merry Christmas —— 给吴芷燕的圣诞祝福" />
 <meta property="og:title" content="Merry Christmas · 吴芷燕" />
 <meta property="og:description" content="愿圣诞的灯火，照亮你的每一个小小愿望。" />
@@ -12,15 +12,21 @@
   :root{
     --gold:#ffd76e;
     --gold-soft:#ffe9b0;
+    --gold-deep:#e2a323;
     --red:#ff4d5e;
+    --red-deep:#b72334;
     --green:#37d07a;
-    --ink:#e9f1ff;
-    --muted:rgba(215,230,255,.62);
+    --green-deep:#0f7a44;
+    --ink:#eef4ff;
+    --muted:rgba(213,228,255,.60);
+    --glass-b:rgba(255,255,255,.14);
+    --blur:22px;
+    --ease:cubic-bezier(.22,1,.36,1);
   }
 
   *,*::before,*::after{ box-sizing:border-box; }
 
-  html{ -webkit-text-size-adjust:100%; }
+  html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
 
   body{
     margin:0;
@@ -32,344 +38,684 @@
                 "Microsoft YaHei", "Hiragino Sans GB", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
+    background:#04070f;
+  }
+
+  /* ============ 多层渐变背景 ============ */
+  .bg-base{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(1200px 700px at 50% -12%, #12315c 0%, rgba(18,49,92,0) 62%),
-      radial-gradient(900px 620px at 12% 108%, #0a2b3a 0%, rgba(10,43,58,0) 60%),
-      radial-gradient(760px 520px at 92% 96%, #2a1030 0%, rgba(42,16,48,0) 62%),
-      linear-gradient(180deg, #061225 0%, #050b18 55%, #03060d 100%);
-    background-attachment:fixed;
+      radial-gradient(1200px 780px at 50% -14%, #16386a 0%, rgba(22,56,106,0) 60%),
+      radial-gradient(900px 640px at 10% 108%, #0a2b3a 0%, rgba(10,43,58,0) 58%),
+      radial-gradient(820px 560px at 94% 92%, #33102c 0%, rgba(51,16,44,0) 60%),
+      radial-gradient(700px 460px at 82% 6%, rgba(255,120,150,.10), transparent 62%),
+      linear-gradient(180deg, #061225 0%, #050b18 52%, #03060d 100%);
   }
 
-  /* ---------- 背景层：飘雪 + 星光 ---------- */
-  #bg{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    display:block;
-    z-index:0;
-    pointer-events:none;
-  }
-
+  /* 极光流动层 */
   .aurora{
-    position:fixed;
-    inset:-10%;
-    z-index:0;
-    pointer-events:none;
+    position:fixed; inset:-14%; z-index:0; pointer-events:none;
     background:
-      radial-gradient(560px 300px at 22% 24%, rgba(90,225,185,.13), transparent 70%),
-      radial-gradient(520px 280px at 78% 16%, rgba(255,120,150,.12), transparent 70%),
-      radial-gradient(620px 320px at 60% 82%, rgba(120,160,255,.10), transparent 72%);
-    filter:blur(14px);
-    animation:auroraShift 16s ease-in-out infinite alternate;
+      radial-gradient(560px 300px at 22% 24%, rgba(90,225,185,.15), transparent 70%),
+      radial-gradient(520px 280px at 78% 14%, rgba(255,120,150,.13), transparent 70%),
+      radial-gradient(640px 330px at 62% 82%, rgba(120,160,255,.11), transparent 72%);
+    filter:blur(18px);
+    animation:auroraShift 17s ease-in-out infinite alternate;
   }
   @keyframes auroraShift{
-    from{ opacity:.72; transform:translate3d(0,0,0) scale(1); }
-    to  { opacity:1;   transform:translate3d(0,-16px,0) scale(1.04); }
+    from{ opacity:.7; transform:translate3d(0,0,0) scale(1);    }
+    to  { opacity:1;  transform:translate3d(0,-18px,0) scale(1.05); }
   }
 
-  /* ---------- 主舞台 ---------- */
+  /* 光束 */
+  .beams{
+    position:fixed; inset:-25%; z-index:0; pointer-events:none;
+    opacity:.5; mix-blend-mode:screen; transform:rotate(-13deg);
+  }
+  .beams i{
+    position:absolute; top:-12%; height:132%; width:clamp(70px,9vw,150px);
+    background:linear-gradient(180deg, transparent 0%, rgba(255,224,160,.20) 42%, rgba(255,240,200,.06) 72%, transparent 100%);
+    filter:blur(30px);
+    animation:beamDrift 16s linear infinite;
+  }
+  .beams i:nth-child(1){ left:14%; animation-delay:-2s; }
+  .beams i:nth-child(2){ left:44%; width:clamp(50px,6vw,110px); opacity:.8; animation-delay:-7s; animation-duration:19s; }
+  .beams i:nth-child(3){ left:72%; opacity:.65;  animation-delay:-11s; animation-duration:22s; }
+  @keyframes beamDrift{
+    0%  { transform:translateY(-6%) scaleY(.94); opacity:.25; }
+    50% { transform:translateY(4%)  scaleY(1.04); opacity:.7;  }
+    100%{ transform:translateY(-6%) scaleY(.94); opacity:.25; }
+  }
+
+  /* 暗角 */
+  .vignette{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:radial-gradient(130% 100% at 50% 42%, rgba(0,0,0,0) 52%, rgba(0,0,0,.55) 100%);
+  }
+
+  /* 背景画布（星空 / 景深雪 / 金尘） */
+  #bg{
+    position:fixed; inset:0; width:100%; height:100%; display:block;
+    z-index:0; pointer-events:none;
+  }
+
+  /* 鼠标光晕 */
+  .cursor-glow{
+    position:fixed; left:0; top:0; z-index:1;
+    width:560px; height:560px; margin-left:-280px; margin-top:-280px;
+    border-radius:50%; pointer-events:none; opacity:0;
+    background:radial-gradient(circle,
+      rgba(255,222,150,.16) 0%,
+      rgba(255,190,110,.09) 34%,
+      rgba(255,120,150,.05) 58%,
+      transparent 72%);
+    filter:blur(12px);
+    transition:opacity .5s ease;
+    will-change:transform;
+  }
+  body.has-pointer .cursor-glow{ opacity:1; }
+
+  /* ============ 入场加载 ============ */
+  .loader{
+    position:fixed; inset:0; z-index:60;
+    display:grid; place-items:center;
+    background:radial-gradient(circle at 50% 42%, #0b1932 0%, #03060d 68%);
+    transition:opacity .65s ease, visibility .65s ease;
+  }
+  .loader.hide{ opacity:0; visibility:hidden; }
+  .loader-inner{ display:grid; justify-items:center; gap:22px; }
+  .snow-spin{ position:relative; width:66px; height:66px; animation:spin 3.4s linear infinite; }
+  .snow-spin i{
+    position:absolute; left:50%; top:0; width:2px; height:100%; margin-left:-1px;
+    border-radius:2px;
+    background:linear-gradient(180deg, transparent, var(--gold) 45%, #fff 55%, transparent);
+  }
+  .snow-spin i:nth-child(2){ transform:rotate(60deg); }
+  .snow-spin i:nth-child(3){ transform:rotate(120deg); }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .loader-text{
+    margin:0; font-size:.78rem; letter-spacing:.36em;
+    color:rgba(220,234,255,.65); text-transform:uppercase;
+  }
+  .loader-bar{
+    width:132px; height:2px; border-radius:2px; overflow:hidden;
+    background:rgba(255,255,255,.12);
+  }
+  .loader-bar i{
+    display:block; height:100%; width:40%; border-radius:2px;
+    background:linear-gradient(90deg, transparent, var(--gold), #fff, transparent);
+    animation:loadSlide 1.25s ease-in-out infinite;
+  }
+  @keyframes loadSlide{
+    0%{ transform:translateX(-110%); }
+    100%{ transform:translateX(320%); }
+  }
+
+  /* ============ 首屏舞台 ============ */
   .stage{
-    position:relative;
-    z-index:2;
-    min-height:100vh;
-    min-height:100svh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:34px;
-    padding:clamp(28px,6vw,64px) 20px 110px;
+    position:relative; z-index:2;
+    min-height:100vh; min-height:100svh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:clamp(26px,4.6vw,52px);
+    padding:clamp(30px,6vw,70px) clamp(18px,4vw,40px) clamp(90px,10vh,120px);
     text-align:center;
   }
 
-  /* ---------- 圣诞树 ---------- */
-  .tree-col{ display:flex; align-items:flex-end; justify-content:center; }
+  /* 入场动画（JS 加载后触发，无 JS 时内容依然可见） */
+  body.arming .tree-col,
+  body.arming .text-col,
+  body.arming .scroll-hint{ opacity:0; }
+
+  body.ready .tree-col{ animation:riseIn .95s var(--ease) both; }
+  body.ready .text-col{ animation:riseIn .95s var(--ease) both .1s; }
+  body.ready .scroll-hint{ animation:riseIn .9s var(--ease) both .55s; }
+
+  @keyframes riseIn{
+    from{ opacity:0; transform:translate3d(0,30px,0) scale(.985); }
+    to  { opacity:1; transform:translate3d(0,0,0) scale(1); }
+  }
+
+  /* ---------- 圣诞树（3D 分层） ---------- */
+  .tree-col{
+    display:flex; align-items:flex-end; justify-content:center;
+    perspective:900px;
+    perspective-origin:50% 46%;
+  }
 
   .tree{
     position:relative;
-    width:min(58vw, 236px);
+    width:min(60vw, 244px);
     aspect-ratio:1 / 1.28;
-    filter:drop-shadow(0 22px 42px rgba(0,0,0,.55));
-    flex:0 0 auto;
+    transform-style:preserve-3d;
+    transform:rotateX(var(--tx,-6deg)) rotateY(var(--ty,0deg)) translateZ(0);
+    transition:transform .16s ease-out;
+    filter:drop-shadow(0 26px 46px rgba(0,0,0,.6));
+  }
+  .tree:hover{ --tx:-2deg; }
+
+  /* 树后光晕 */
+  .halo{
+    position:absolute; left:50%; top:26%;
+    width:132%; aspect-ratio:1; transform:translate(-50%,-50%) translateZ(-60px);
+    background:radial-gradient(circle, rgba(90,235,170,.20) 0%, rgba(60,200,150,.08) 42%, transparent 68%);
+    filter:blur(16px);
+    animation:haloPulse 5s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes haloPulse{
+    0%,100%{ opacity:.6; transform:translate(-50%,-50%) translateZ(-60px) scale(1); }
+    50%    { opacity:1;  transform:translate(-50%,-50%) translateZ(-60px) scale(1.08); }
   }
 
   .tier{
-    position:absolute;
-    left:50%;
-    transform:translateX(-50%);
+    position:absolute; left:50%;
     clip-path:polygon(50% 0%, 100% 100%, 0% 100%);
-    background:linear-gradient(180deg, #37d07a 0%, #1f9e58 55%, #137a43 100%);
+    background:linear-gradient(180deg, #3ede86 0%, #1f9e58 55%, #10703e 100%);
+    box-shadow:inset 0 -10px 24px rgba(0,0,0,.28);
   }
-  .tier1{ top:6%;  width:46%; height:33%; }
-  .tier2{ top:26%; width:70%; height:35%; background:linear-gradient(180deg,#44dc88 0%,#23a95f 55%,#158047 100%); }
-  .tier3{ top:50%; width:96%; height:40%; background:linear-gradient(180deg,#4de890 0%,#27b265 55%,#17874a 100%); }
+  .tier1{ top:6%;  width:46%; height:33%; transform:translateX(-50%) translateZ(12px); }
+  .tier2{ top:26%; width:70%; height:35%; transform:translateX(-50%) translateZ(4px);
+          background:linear-gradient(180deg,#47e28c 0%,#23a95f 55%,#137a45 100%); }
+  .tier3{ top:50%; width:96%; height:40%; transform:translateX(-50%) translateZ(-6px);
+          background:linear-gradient(180deg,#52f096 0%,#29b667 55%,#16894b 100%); }
 
   .trunk{
-    position:absolute;
-    bottom:1.4%;
-    left:50%;
-    transform:translateX(-50%);
-    width:11%;
-    height:12%;
+    position:absolute; bottom:1.4%; left:50%;
+    width:11%; height:12%; transform:translateX(-50%) translateZ(0);
     border-radius:3px 3px 2px 2px;
-    background:linear-gradient(180deg,#8a5a34,#5b3a20);
+    background:linear-gradient(180deg,#8a5a34,#4d3018);
   }
 
   .star{
-    position:absolute;
-    top:-2%;
-    left:50%;
-    width:15%;
-    aspect-ratio:1;
-    transform:translateX(-50%);
-    background:radial-gradient(circle at 50% 50%, #fffbe8 0%, #ffd76e 58%, #f0a92c 100%);
+    position:absolute; top:-2.4%; left:50%;
+    width:15.5%; aspect-ratio:1;
+    transform:translateX(-50%) translateZ(26px);
+    background:radial-gradient(circle at 50% 50%, #fffcef 0%, #ffd76e 56%, #f0a92c 100%);
     clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-    filter:drop-shadow(0 0 12px rgba(255,215,110,.95));
-    animation:twinkle 2.2s ease-in-out infinite;
+    filter:drop-shadow(0 0 14px rgba(255,215,110,.95));
+    animation:twinkle 2.4s ease-in-out infinite;
   }
   @keyframes twinkle{
-    0%,100%{ transform:translateX(-50%) scale(1);    opacity:1; }
-    50%    { transform:translateX(-50%) scale(1.16); opacity:.8; }
+    0%,100%{ transform:translateX(-50%) translateZ(26px) scale(1); opacity:1; }
+    50%    { transform:translateX(-50%) translateZ(26px) scale(1.15) rotate(6deg); opacity:.82; }
   }
 
-  .lights{ position:absolute; inset:0; pointer-events:none; }
+  .lights{ position:absolute; inset:0; transform:translateZ(16px); pointer-events:none; }
   .light{
-    position:absolute;
-    aspect-ratio:1;
-    border-radius:50%;
+    position:absolute; aspect-ratio:1; border-radius:50%;
     transform:translate(-50%,-50%);
     animation:flick 2.2s ease-in-out infinite;
   }
   @keyframes flick{
-    0%,100%{ opacity:.5;  filter:brightness(.85); }
-    50%    { opacity:1;   filter:brightness(1.5); }
+    0%,100%{ opacity:.45; filter:brightness(.8); }
+    50%    { opacity:1;   filter:brightness(1.55); }
   }
 
-  /* ---------- 文案区 ---------- */
-  .text-col{ max-width:min(100%, 560px); }
+  /* 树下礼物 */
+  .gift{
+    position:absolute; bottom:-1%; border-radius:3px;
+    background:linear-gradient(180deg,#ff5f6e,#b72334);
+    box-shadow:0 6px 18px rgba(0,0,0,.45), 0 0 18px rgba(255,90,110,.35);
+  }
+  .gift::before,.gift::after{ content:""; position:absolute; background:rgba(255,236,180,.9); }
+  .gift::before{ left:50%; top:0; bottom:0; width:3px; margin-left:-1.5px; }
+  .gift::after{ left:0; right:0; top:46%; height:3px; }
+  .gift.g1{ left:6%;  width:20%; height:11%; transform:translateZ(8px); }
+  .gift.g2{ left:26%; width:16%; height:9%;  transform:translateZ(14px);
+            background:linear-gradient(180deg,#6fdcaa,#12784a); }
+  .gift.g3{ right:8%; width:18%; height:10%; transform:translateZ(6px);
+            background:linear-gradient(180deg,#ffe08a,#d79b1e); }
 
+  /* ---------- 玻璃卡片 ---------- */
+  .glass{
+    position:relative;
+    border-radius:28px;
+    border:1px solid var(--glass-b);
+    background:
+      linear-gradient(158deg, rgba(255,255,255,.105) 0%, rgba(255,255,255,.045) 40%, rgba(255,255,255,.018) 100%);
+    -webkit-backdrop-filter:blur(var(--blur)) saturate(150%);
+    backdrop-filter:blur(var(--blur)) saturate(150%);
+    box-shadow:
+      0 34px 74px rgba(2,6,18,.55),
+      0 0 80px rgba(255,200,90,.08),
+      inset 0 1px 0 rgba(255,255,255,.24),
+      inset 0 -1px 0 rgba(255,255,255,.05);
+    overflow:hidden;
+  }
+  .glass::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,235,180,.8), rgba(255,200,120,.2), transparent);
+  }
+  .glass::after{
+    content:""; position:absolute; right:-18%; top:-34%;
+    width:62%; aspect-ratio:1; pointer-events:none;
+    background:radial-gradient(circle, rgba(255,215,110,.20), transparent 66%);
+    filter:blur(20px);
+  }
+
+  .text-col{ width:min(100%, 580px); }
+
+  .card-main{
+    padding:clamp(26px,4.4vw, 46px) clamp(22px,4vw, 44px) clamp(24px,4vw, 40px);
+    text-align:center;
+    transition:transform .5s var(--ease), box-shadow .5s var(--ease), border-color .5s var(--ease);
+  }
+  .card-main:hover{
+    transform:translateY(-4px);
+    border-color:rgba(255,215,110,.34);
+    box-shadow:
+      0 40px 90px rgba(2,6,18,.6),
+      0 0 110px rgba(255,200,90,.16),
+      inset 0 1px 0 rgba(255,255,255,.3);
+  }
+
+  /* ---------- 字体层级 ---------- */
   .eyebrow{
-    margin:0 0 14px;
-    font-size:clamp(.62rem, 2.3vw, .74rem);
-    letter-spacing:.42em;
-    color:var(--muted);
-    text-transform:uppercase;
+    margin:0 0 clamp(12px,2vw,18px);
+    font-size:clamp(.6rem, 2.2vw, .72rem);
+    letter-spacing:.44em; text-indent:.44em;
+    color:var(--muted); text-transform:uppercase;
   }
 
   .title{
     margin:0;
-    font-size:clamp(2rem, 9.2vw, 4rem);
-    line-height:1.06;
+    font-size:clamp(2rem, 8.8vw, 4.1rem);
+    line-height:1.04;
     font-weight:800;
     letter-spacing:.01em;
-    background:linear-gradient(100deg,#ffffff 0%, #ffe9b0 32%, #ffc95c 48%, #ffffff 66%, #ffe9b0 100%);
+    background:linear-gradient(100deg,#ffffff 0%, #ffe9b0 30%, #ffc95c 47%, #ffffff 64%, #ffe9b0 100%);
     background-size:220% 100%;
-    -webkit-background-clip:text;
-    background-clip:text;
+    -webkit-background-clip:text; background-clip:text;
     color:transparent;
-    filter:drop-shadow(0 0 20px rgba(255,205,110,.42));
-    animation:shine 7s linear infinite;
+    filter:drop-shadow(0 0 22px rgba(255,205,110,.45));
+    animation:shine 8s linear infinite;
   }
   @keyframes shine{ to{ background-position:220% 0; } }
 
   .subtitle{
-    margin:12px 0 26px;
-    font-size:clamp(.9rem, 3.4vw, 1.2rem);
-    letter-spacing:.62em;
-    text-indent:.62em;
-    color:#cfe3ff;
-    opacity:.86;
+    margin:clamp(10px,1.6vw,14px) 0 clamp(20px,3vw,28px);
+    font-size:clamp(.88rem, 3.3vw, 1.18rem);
+    letter-spacing:.66em; text-indent:.66em;
+    color:#cfe3ff; opacity:.85;
   }
 
   .name-card{
-    display:inline-flex;
-    align-items:center;
-    gap:.6em;
-    margin:0 0 24px;
-    padding:.5em 1.35em;
-    border-radius:999px;
-    white-space:nowrap;
-    background:linear-gradient(135deg, rgba(255,215,110,.17), rgba(255,90,110,.14));
-    border:1px solid rgba(255,215,110,.42);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-    animation:breathe 3.4s ease-in-out infinite;
+    display:inline-flex; align-items:center; gap:.6em;
+    margin:0 0 clamp(18px,3vw,26px);
+    padding:.52em 1.4em;
+    border-radius:999px; white-space:nowrap;
+    background:linear-gradient(135deg, rgba(255,215,110,.18), rgba(255,90,110,.15));
+    border:1px solid rgba(255,215,110,.44);
+    -webkit-backdrop-filter:blur(9px); backdrop-filter:blur(9px);
+    animation:breathe 3.6s ease-in-out infinite;
+    transition:transform .4s var(--ease);
   }
+  .name-card:hover{ transform:translateY(-2px) scale(1.02); }
   @keyframes breathe{
-    0%,100%{ box-shadow:0 0 30px rgba(255,200,90,.18), inset 0 0 22px rgba(255,255,255,.05); }
-    50%    { box-shadow:0 0 58px rgba(255,200,90,.4),  inset 0 0 30px rgba(255,255,255,.11); }
+    0%,100%{ box-shadow:0 0 32px rgba(255,200,90,.18), inset 0 0 22px rgba(255,255,255,.05); }
+    50%    { box-shadow:0 0 62px rgba(255,200,90,.42), inset 0 0 30px rgba(255,255,255,.11); }
   }
-
   .name-card .to{
-    font-size:clamp(.78rem, 2.6vw, .92rem);
-    letter-spacing:.26em;
-    color:var(--gold);
-    opacity:.92;
+    font-size:clamp(.76rem, 2.5vw, .9rem);
+    letter-spacing:.28em; color:var(--gold); opacity:.92;
   }
-
   .name-card .name{
-    font-size:clamp(1.5rem, 6vw, 2.3rem);
-    font-weight:800;
-    letter-spacing:.14em;
+    font-size:clamp(1.55rem, 6.2vw, 2.35rem);
+    font-weight:800; letter-spacing:.14em;
     background:linear-gradient(180deg,#fff8e1 0%, #ffd76e 58%, #f0a92c 100%);
-    -webkit-background-clip:text;
-    background-clip:text;
+    -webkit-background-clip:text; background-clip:text;
     color:transparent;
-    filter:drop-shadow(0 0 16px rgba(255,200,90,.5));
+    filter:drop-shadow(0 0 18px rgba(255,200,90,.52));
   }
 
+  /* 打字机祝福 */
   .bless{
-    margin:0 0 28px;
+    margin:0 0 clamp(22px,3.4vw,32px);
+    min-height:7.4em;
     font-size:clamp(.9rem, 3.3vw, 1.06rem);
-    line-height:2.05;
-    color:#d7e6ff;
-    opacity:.94;
+    line-height:2.1;
+    color:#d9e8ff; opacity:.95;
+    letter-spacing:.02em;
   }
+  .caret{
+    display:inline-block;
+    width:2px; height:1.05em;
+    margin-left:2px;
+    vertical-align:-.16em;
+    background:var(--gold);
+    animation:blink 1s steps(2, start) infinite;
+    box-shadow:0 0 8px rgba(255,215,110,.9);
+  }
+  @keyframes blink{ 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
 
-  .actions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-    justify-content:center;
-  }
+  /* 按钮 */
+  .actions{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; }
 
   .btn{
-    -webkit-appearance:none;
-    appearance:none;
-    cursor:pointer;
-    font:inherit;
-    font-size:clamp(.8rem, 2.9vw, .9rem);
-    padding:.72em 1.3em;
+    -webkit-appearance:none; appearance:none; cursor:pointer;
+    font:inherit; font-size:clamp(.78rem, 2.9vw, .88rem);
+    letter-spacing:.04em;
+    padding:.76em 1.42em;
     border-radius:999px;
-    color:#eaf6ff;
+    color:#eef6ff;
     background:rgba(255,255,255,.07);
     border:1px solid rgba(255,255,255,.2);
-    backdrop-filter:blur(6px);
-    -webkit-backdrop-filter:blur(6px);
-    transition:transform .22s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease;
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    transition:transform .25s var(--ease), background .25s, border-color .25s, box-shadow .25s;
   }
   .btn:hover{
     background:rgba(255,215,110,.17);
-    border-color:rgba(255,215,110,.55);
+    border-color:rgba(255,215,110,.58);
     transform:translateY(-2px);
-    box-shadow:0 12px 26px rgba(0,0,0,.35);
+    box-shadow:0 14px 30px rgba(0,0,0,.38), 0 0 26px rgba(255,200,90,.22);
   }
   .btn:active{ transform:translateY(0) scale(.98); }
   .btn:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
 
-  footer{
-    position:fixed;
-    left:0; right:0; bottom:0;
-    z-index:2;
-    padding:14px 16px calc(14px + env(safe-area-inset-bottom));
-    text-align:center;
-    font-size:clamp(.68rem, 2.4vw, .76rem);
-    letter-spacing:.1em;
-    color:rgba(215,230,255,.5);
-    pointer-events:none;
+  .btn-gold{
+    color:#2a1a05;
+    font-weight:700;
+    background:linear-gradient(135deg, #ffe9b0 0%, #ffd76e 42%, #e8ae2e 100%);
+    border-color:rgba(255,240,200,.9);
+    box-shadow:0 12px 30px rgba(226,163,35,.32), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .btn-gold:hover{
+    background:linear-gradient(135deg, #fff2ca 0%, #ffdc84 42%, #f0b833 100%);
+    box-shadow:0 18px 38px rgba(226,163,35,.45), 0 0 30px rgba(255,215,110,.45);
+    border-color:#fff;
   }
 
-  /* ---------- 桌面宽屏：左右布局 ---------- */
+  /* 滚动提示 */
+  .scroll-hint{
+    position:absolute; left:50%; bottom:clamp(16px,3vw,30px);
+    transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:9px;
+    font-size:clamp(.6rem,2vw,.68rem); letter-spacing:.28em;
+    color:rgba(213,228,255,.5);
+    pointer-events:none;
+  }
+  .scroll-hint i{
+    width:1px; height:34px; border-radius:1px;
+    background:linear-gradient(180deg, rgba(255,215,110,.9), transparent);
+    animation:dropLine 1.9s ease-in-out infinite;
+  }
+  @keyframes dropLine{
+    0%  { transform:scaleY(.25); transform-origin:top;    opacity:.25; }
+    50% { transform:scaleY(1);   transform-origin:top;    opacity:1;   }
+    100%{ transform:scaleY(.25); transform-origin:bottom; opacity:.25; }
+  }
+
+  /* ============ 第二屏：玻璃卡片 ============ */
+  .cards-section{
+    position:relative; z-index:2;
+    padding:clamp(20px,6vw,70px) clamp(18px,4vw,40px) clamp(60px,9vw,110px);
+    max-width:1120px; margin:0 auto;
+  }
+  .cards-head{
+    text-align:center;
+    margin:0 0 clamp(26px,4vw,46px);
+  }
+  .cards-head .eyebrow{ margin-bottom:10px; }
+  .cards-head h2{
+    margin:0;
+    font-size:clamp(1.15rem, 4.4vw, 1.7rem);
+    font-weight:700; letter-spacing:.06em;
+    color:#eef4ff;
+    text-shadow:0 0 26px rgba(255,215,110,.28);
+  }
+  .cards-head p{
+    margin:12px 0 0;
+    font-size:clamp(.78rem,2.9vw,.9rem);
+    color:var(--muted); letter-spacing:.1em;
+  }
+
+  .cards{
+    display:grid; gap:clamp(16px,2.6vw,24px);
+    grid-template-columns:1fr;
+  }
+  @media (min-width:820px){
+    .cards{ grid-template-columns:repeat(3, 1fr); }
+  }
+
+  .card{
+    padding:clamp(22px,3.2vw,32px);
+    transition:transform .5s var(--ease), box-shadow .5s var(--ease), border-color .5s var(--ease), opacity .8s var(--ease);
+  }
+  .card:hover{
+    transform:translateY(-8px);
+    border-color:rgba(255,215,110,.32);
+    box-shadow:
+      0 40px 90px rgba(2,6,18,.6),
+      0 0 100px rgba(255,200,90,.14),
+      inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  .card .ico{
+    display:inline-grid; place-items:center;
+    width:44px; height:44px; margin-bottom:16px;
+    border-radius:14px;
+    font-size:20px; line-height:1;
+    background:linear-gradient(140deg, rgba(255,215,110,.22), rgba(255,90,110,.14));
+    border:1px solid rgba(255,215,110,.3);
+    transition:transform .5s var(--ease), box-shadow .5s var(--ease);
+  }
+  .card:hover .ico{
+    transform:translateY(-3px) rotate(-6deg) scale(1.06);
+    box-shadow:0 12px 26px rgba(255,190,90,.3);
+  }
+  .card h3{
+    margin:0 0 10px;
+    font-size:clamp(.98rem, 3.3vw, 1.08rem);
+    font-weight:700; letter-spacing:.06em;
+    color:#fff6de;
+  }
+  .card p{
+    margin:0;
+    font-size:clamp(.82rem, 3vw, .92rem);
+    line-height:1.95;
+    color:rgba(216,230,255,.82);
+  }
+
+  /* 滚动进场 */
+  .reveal{ opacity:0; transform:translateY(34px); }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ============ 页脚 ============ */
+  footer{
+    position:relative; z-index:2;
+    padding:0 16px calc(30px + env(safe-area-inset-bottom));
+    text-align:center;
+    font-size:clamp(.66rem, 2.4vw, .76rem);
+    letter-spacing:.14em;
+    color:rgba(213,228,255,.42);
+  }
+  footer .dot{
+    display:inline-block; width:4px; height:4px; margin:0 10px;
+    border-radius:50%; background:rgba(255,215,110,.6); vertical-align:middle;
+  }
+
+  /* ============ 宽屏：左右布局 ============ */
   @media (min-width:900px){
     .stage{
       flex-direction:row;
-      justify-content:center;
-      align-items:center;
-      gap:clamp(48px, 6vw, 92px);
+      justify-content:center; align-items:center;
+      gap:clamp(44px,5.5vw,86px);
       text-align:left;
-      padding:48px 64px 110px;
+      padding:clamp(40px,6vh,72px) clamp(40px,6vw,80px) clamp(90px,10vh,120px);
     }
-    .tree{ width:clamp(240px, 24vw, 330px); }
-    .text-col{ max-width:560px; }
+    .tree{ width:clamp(250px, 23vw, 336px); }
+    .card-main{ text-align:left; }
     .actions{ justify-content:flex-start; }
-    .eyebrow{ margin-bottom:16px; }
+    .bless{ min-height:6.6em; }
   }
-
   @media (min-width:1280px){
-    .tree{ width:clamp(280px, 22vw, 360px); }
+    .tree{ width:clamp(290px, 21vw, 372px); }
   }
 
-  /* ---------- 无障碍：减少动效偏好 ---------- */
+  /* ============ 移动端降级 ============ */
+  @media (max-width:720px){
+    :root{ --blur:14px; }
+    .beams{ opacity:.3; }
+    .aurora{ filter:blur(24px); }
+    .cursor-glow{ display:none; }
+    .card-main:hover{ transform:none; }
+    .bless{ min-height:7.8em; }
+  }
+
+  /* 减少动效偏好 */
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{
       animation-duration:.001ms !important;
       animation-iteration-count:1 !important;
       transition-duration:.001ms !important;
+      scroll-behavior:auto !important;
     }
+    .reveal{ opacity:1; transform:none; }
+    .caret{ display:none; }
   }
 </style>
 </head>
 <body>
 
+<!-- 入场加载 -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-inner">
+    <div class="snow-spin"><i></i><i></i><i></i></div>
+    <p class="loader-text">Lighting up Christmas</p>
+    <div class="loader-bar"><i></i></div>
+  </div>
+</div>
+
+<!-- 背景层 -->
+<div class="bg-base" aria-hidden="true"></div>
 <canvas id="bg" aria-hidden="true"></canvas>
 <div class="aurora" aria-hidden="true"></div>
+<div class="beams" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="cursor-glow" id="glow" aria-hidden="true"></div>
 
-<main class="stage">
-  <section class="tree-col" aria-hidden="true">
-    <div class="tree">
-      <div class="star"></div>
-      <div class="tier tier3"></div>
-      <div class="tier tier2"></div>
-      <div class="tier tier1"></div>
-      <div class="trunk"></div>
-      <div class="lights" id="lights"></div>
+<main>
+  <!-- 首屏 -->
+  <section class="stage" id="stage">
+    <section class="tree-col" aria-hidden="true">
+      <div class="tree" id="tree">
+        <div class="halo"></div>
+        <div class="star"></div>
+        <div class="tier tier3"></div>
+        <div class="tier tier2"></div>
+        <div class="tier tier1"></div>
+        <div class="trunk"></div>
+        <div class="lights" id="lights"></div>
+        <i class="gift g1"></i>
+        <i class="gift g2"></i>
+        <i class="gift g3"></i>
+      </div>
+    </section>
+
+    <section class="text-col">
+      <div class="glass card-main">
+        <p class="eyebrow">2026 · Christmas Special</p>
+        <h1 class="title">Merry Christmas</h1>
+        <p class="subtitle">圣诞快乐</p>
+
+        <div class="name-card">
+          <span class="to">To</span>
+          <span class="name">吴芷燕</span>
+        </div>
+
+        <p class="bless" id="typed" aria-live="polite"></p>
+
+        <div class="actions">
+          <button id="snowBtn" class="btn btn-gold" type="button">❄ 撒一把雪</button>
+          <button id="bellBtn" class="btn" type="button">🔔 铃儿响叮当</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="scroll-hint" aria-hidden="true"><span>SCROLL</span><i></i></div>
+  </section>
+
+  <!-- 第二屏 -->
+  <section class="cards-section">
+    <div class="cards-head">
+      <p class="eyebrow">Three Little Wishes</p>
+      <h2>写给你的三件小事</h2>
+      <p>愿这个冬天，所有温柔都朝你走来</p>
+    </div>
+
+    <div class="cards">
+      <article class="glass card reveal">
+        <span class="ico">✦</span>
+        <h3>关于你</h3>
+        <p>愿你眼里有光，心中有暖，脚下有路。所有的努力都不被辜负，所有的等待都有回音。</p>
+      </article>
+
+      <article class="glass card reveal">
+        <span class="ico">❄</span>
+        <h3>关于这个冬天</h3>
+        <p>雪落下的声音，是这一年最温柔的背景音。愿你有热可可、有暖手的人，也有说不完的好心情。</p>
+      </article>
+
+      <article class="glass card reveal">
+        <span class="ico">🎁</span>
+        <h3>关于未来</h3>
+        <p>钟声敲响的时候，请把烦恼留在旧的一年。愿新的一年，所求皆如愿，所行化坦途。</p>
+      </article>
     </div>
   </section>
 
-  <section class="text-col">
-    <p class="eyebrow">2026 · Christmas</p>
-    <h1 class="title">Merry Christmas</h1>
-    <p class="subtitle">圣诞快乐</p>
-
-    <div class="name-card">
-      <span class="to">To</span>
-      <span class="name">吴芷燕</span>
-    </div>
-
-    <p class="bless">
-      愿圣诞的灯火，照亮你的每一个小小愿望；<br />
-      愿新年的钟声，为你敲来满满的好运与欢笑；<br />
-      愿你被这世界温柔以待，所求皆如愿。
-    </p>
-
-    <div class="actions">
-      <button id="snowBtn" class="btn" type="button">❄ 撒一把雪</button>
-      <button id="bellBtn" class="btn" type="button">🔔 铃儿响叮当</button>
-    </div>
-  </section>
+  <footer>
+    Merry Christmas &amp; Happy New Year<span class="dot"></span>为 吴芷燕 定制
+  </footer>
 </main>
-
-<footer>Merry Christmas &amp; Happy New Year · 为 吴芷燕 定制</footer>
 
 <script>
 (function () {
   "use strict";
 
-  /* ============================================================
-   *  1. 圣诞树彩灯：按三角形包络随机布置
-   * ============================================================ */
-  var lightsBox = document.getElementById("lights");
+  /* =========================================================
+   *  0. 环境探测与质量分级
+   * ========================================================= */
+  var mqReduce = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  var mqSmall  = window.matchMedia ? window.matchMedia("(max-width: 720px)") : null;
+  var reduced  = !!(mqReduce && mqReduce.matches);
+  var isSmall  = !!(mqSmall && mqSmall.matches);
+  var cores    = navigator.hardwareConcurrency || 4;
+
+  var QUALITY = reduced ? "low" : ((isSmall || cores <= 4) ? "mid" : "high");
+
+  var CFG = {
+    high: { flakes: 190, stars: 240, dust: 64, dpr: 2.0 },
+    mid:  { flakes: 110, stars: 150, dust: 30, dpr: 1.6 },
+    low:  { flakes: 0,   stars: 130, dust: 0,  dpr: 1.2 }
+  }[QUALITY];
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function byId(id) { return document.getElementById(id); }
+
+  /* =========================================================
+   *  1. 圣诞树彩灯
+   * ========================================================= */
+  var lightsBox = byId("lights");
   var PALETTE = ["#ff4d5e", "#ffd76e", "#7ef1c8", "#8ab6ff", "#ff9ad5", "#fff2c0"];
 
   function buildLights() {
     if (!lightsBox) return;
     lightsBox.innerHTML = "";
 
-    var rows = 8;
+    var rows = QUALITY === "low" ? 6 : 8;
     for (var r = 0; r < rows; r++) {
-      var t = (r + 1) / rows;          /* 0.125 ~ 1，自上而下 */
-      var yPct = 8 + t * 80;           /* 8% ~ 88% */
-      var halfW = 46 * t;              /* 该高度处三角形半宽（%） */
+      var t = (r + 1) / rows;
+      var yPct = 8 + t * 80;
+      var halfW = 46 * t;
       var count = 1 + Math.round(t * 4);
 
       for (var i = 0; i < count; i++) {
         var rel = count === 1 ? 0 : (i / (count - 1)) * 2 - 1;
-        var xPct = 50 + rel * halfW * 0.84;
-
         var dot = document.createElement("span");
         dot.className = "light";
-        dot.style.left = xPct.toFixed(2) + "%";
+        dot.style.left = (50 + rel * halfW * 0.84).toFixed(2) + "%";
         dot.style.top = yPct.toFixed(2) + "%";
         dot.style.width = (2 + Math.random() * 1.5).toFixed(2) + "%";
         dot.style.color = PALETTE[(Math.random() * PALETTE.length) | 0];
@@ -382,98 +728,144 @@
     }
   }
 
-  /* ============================================================
-   *  2. Canvas 背景：闪烁星光 + 飘雪
-   * ============================================================ */
-  var canvas = document.getElementById("bg");
-  var ctx = canvas && canvas.getContext ? canvas.getContext("2d") : null;
+  /* =========================================================
+   *  2. 背景粒子：星空 + 景深雪 + 金尘
+   * ========================================================= */
+  var canvas = byId("bg");
+  var ctx = (canvas && canvas.getContext) ? canvas.getContext("2d", { alpha: true }) : null;
   var W = 0, H = 0, DPR = 1;
-  var stars = [], flakes = [];
-  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var stars = [], flakes = [], dust = [];
+  var SPR = {};
 
-  function rand(a, b) { return a + Math.random() * (b - a); }
+  /* 预渲染柔边雪花精灵，模拟景深虚化（比逐帧 blur 快得多） */
+  function makeSprite(size, alpha, tint) {
+    var c = document.createElement("canvas");
+    var s = Math.max(2, Math.round(size * 2));
+    c.width = s; c.height = s;
+    var g = c.getContext("2d");
+    var grd = g.createRadialGradient(size, size, 0, size, size, size);
+    grd.addColorStop(0, "rgba(" + tint + "," + alpha + ")");
+    grd.addColorStop(0.42, "rgba(" + tint + "," + (alpha * 0.55).toFixed(3) + ")");
+    grd.addColorStop(1, "rgba(" + tint + ",0)");
+    g.fillStyle = grd;
+    g.beginPath();
+    g.arc(size, size, size, 0, Math.PI * 2);
+    g.fill();
+    return c;
+  }
+
+  function buildSprites() {
+    SPR.far  = makeSprite(7,  0.30, "225,240,255");
+    SPR.mid  = makeSprite(13, 0.58, "238,246,255");
+    SPR.near = makeSprite(26, 0.88, "255,255,255");
+    SPR.gold = makeSprite(9,  0.55, "255,214,120");
+  }
 
   function buildStars() {
     stars = [];
-    var n = Math.min(240, Math.round((W * H) / 8200));
-    for (var i = 0; i < n; i++) {
+    for (var i = 0; i < CFG.stars; i++) {
       stars.push({
         x: Math.random() * W,
         y: Math.random() * H,
-        r: rand(0.35, 1.35),
+        r: rand(0.35, 1.4),
         phase: Math.random() * Math.PI * 2,
         speed: rand(0.6, 2.0),
-        hue: Math.random() < 0.22 ? "255,236,180" : "225,238,255"
+        warm: Math.random() < 0.22
       });
     }
   }
 
-  function makeFlake(fromX, fromY, burst) {
+  /* 雪花分三层景深：0 远 / 1 中 / 2 近 */
+  function makeFlake(layer, x, y, burst) {
+    var base = layer === 0 ? rand(1.6, 3.2) : (layer === 1 ? rand(2.8, 5.2) : rand(5.0, 9.0));
     return {
-      x: fromX === undefined ? Math.random() * W : fromX,
-      y: fromY === undefined ? Math.random() * H - H : fromY,
-      r: burst ? rand(1.0, 2.8) : rand(0.6, 2.6),
-      sp: rand(0.5, 1.5),
-      sway: rand(0.3, 1.1),
+      layer: layer,
+      x: (x === undefined) ? Math.random() * W : x,
+      y: (y === undefined) ? Math.random() * H : y,
+      r: burst ? rand(2.2, 6.0) : base,
+      sp: layer === 0 ? rand(0.22, 0.5) : (layer === 1 ? rand(0.5, 1.0) : rand(1.0, 1.9)),
+      sway: rand(0.25, 1.0),
       seed: Math.random() * 1000,
-      alpha: rand(0.35, 0.95),
-      vx: burst ? rand(-3.2, 3.2) : 0,
-      vy: burst ? rand(-4.2, -0.8) : 0,
+      alpha: layer === 0 ? rand(0.3, 0.55) : (layer === 1 ? rand(0.5, 0.8) : rand(0.7, 0.95)),
+      vx: burst ? rand(-3.4, 3.4) : 0,
+      vy: burst ? rand(-4.6, -1.0) : 0,
       g: burst ? 0.09 : 0
     };
   }
 
+  function pickLayer() {
+    var r = Math.random();
+    if (r < 0.5) return 0;
+    if (r < 0.85) return 1;
+    return 2;
+  }
+
   function buildFlakes() {
     flakes = [];
-    var n = Math.min(170, Math.max(40, Math.round(W / 9)));
-    for (var i = 0; i < n; i++) flakes.push(makeFlake());
+    for (var i = 0; i < CFG.flakes; i++) {
+      flakes.push(makeFlake(pickLayer()));
+    }
+  }
+
+  function buildDust() {
+    dust = [];
+    for (var i = 0; i < CFG.dust; i++) {
+      dust.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: rand(1.2, 3.4),
+        vy: rand(-0.28, -0.08),
+        phase: Math.random() * Math.PI * 2
+      });
+    }
   }
 
   function resetFlake(f) {
+    f.layer = pickLayer();
     f.x = Math.random() * W;
-    f.y = -rand(4, 60);
-    f.r = rand(0.6, 2.6);
-    f.sp = rand(0.5, 1.5);
-    f.sway = rand(0.3, 1.1);
-    f.alpha = rand(0.35, 0.95);
-    f.vx = 0;
-    f.vy = 0;
-    f.g = 0;
+    f.y = -rand(6, 70);
+    f.r = f.layer === 0 ? rand(1.6, 3.2) : (f.layer === 1 ? rand(2.8, 5.2) : rand(5.0, 9.0));
+    f.sp = f.layer === 0 ? rand(0.22, 0.5) : (f.layer === 1 ? rand(0.5, 1.0) : rand(1.0, 1.9));
+    f.sway = rand(0.25, 1.0);
+    f.alpha = f.layer === 0 ? rand(0.3, 0.55) : (f.layer === 1 ? rand(0.5, 0.8) : rand(0.7, 0.95));
+    f.vx = 0; f.vy = 0; f.g = 0;
   }
 
   function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    DPR = Math.min(window.devicePixelRatio || 1, CFG.dpr);
     W = window.innerWidth;
     H = window.innerHeight;
-    if (!canvas || !ctx) return;
 
-    canvas.width = Math.floor(W * DPR);
-    canvas.height = Math.floor(H * DPR);
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (canvas && ctx) {
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
 
     buildStars();
     buildFlakes();
+    buildDust();
   }
 
   function drawStars(ts) {
     for (var i = 0; i < stars.length; i++) {
       var s = stars[i];
-      var tw = reduced ? 0.8 : (0.32 + 0.68 * Math.abs(Math.sin(ts * 0.001 * s.speed + s.phase)));
+      var tw = reduced ? 0.8 : (0.3 + 0.7 * Math.abs(Math.sin(ts * 0.001 * s.speed + s.phase)));
       ctx.beginPath();
-      ctx.fillStyle = "rgba(" + s.hue + "," + tw.toFixed(3) + ")";
+      ctx.fillStyle = s.warm
+        ? "rgba(255,236,180," + tw.toFixed(3) + ")"
+        : "rgba(226,240,255," + tw.toFixed(3) + ")";
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
   function drawFlakes() {
-    ctx.fillStyle = "#ffffff";
     for (var i = 0; i < flakes.length; i++) {
       var f = flakes[i];
 
-      /* 物理更新 */
       if (f.g) {
         f.vy += f.g;
         f.x += f.vx;
@@ -481,15 +873,29 @@
         f.vx *= 0.985;
       } else {
         f.y += f.sp;
-        f.x += Math.sin((f.y + f.seed) / 70) * f.sway * 0.6;
+        f.x += Math.sin((f.y + f.seed) / 72) * f.sway * 0.7;
       }
 
-      if (f.y > H + 12 || f.x < -30 || f.x > W + 30) resetFlake(f);
+      if (f.y > H + 20 || f.x < -40 || f.x > W + 40) resetFlake(f);
 
+      var sp = f.layer === 0 ? SPR.far : (f.layer === 1 ? SPR.mid : SPR.near);
+      var d = f.r * 2;
       ctx.globalAlpha = f.alpha;
-      ctx.beginPath();
-      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.drawImage(sp, f.x - f.r, f.y - f.r, d, d);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawDust(ts) {
+    for (var i = 0; i < dust.length; i++) {
+      var p = dust[i];
+      p.y += p.vy;
+      p.x += Math.sin((ts * 0.0004) + p.phase) * 0.18;
+      if (p.y < -20) { p.y = H + 12; p.x = Math.random() * W; }
+
+      ctx.globalAlpha = 0.28 + 0.34 * Math.abs(Math.sin(ts * 0.0012 + p.phase));
+      var d = p.r * 2.6;
+      ctx.drawImage(SPR.gold, p.x - p.r * 1.3, p.y - p.r * 1.3, d, d);
     }
     ctx.globalAlpha = 1;
   }
@@ -497,41 +903,154 @@
   var rafId = 0;
   function loop(ts) {
     if (!ctx) return;
+    var t = ts || 0;
     ctx.clearRect(0, 0, W, H);
-    drawStars(ts || 0);
+    drawStars(t);
     drawFlakes();
+    if (CFG.dust) drawDust(t);
     rafId = window.requestAnimationFrame(loop);
   }
 
-  /* 点击 / 触摸位置爆开一把雪 */
+  /* 点击 / 触摸处爆开一把雪 */
   function burstAt(x, y) {
-    for (var i = 0; i < 26; i++) flakes.push(makeFlake(x + rand(-14, 14), y + rand(-14, 14), true));
-    if (flakes.length > 520) flakes.splice(0, flakes.length - 520);
+    for (var i = 0; i < 22; i++) {
+      flakes.push(makeFlake(pickLayer(), x + rand(-16, 16), y + rand(-16, 16), true));
+    }
+    if (flakes.length > 620) flakes.splice(0, flakes.length - 620);
   }
 
-  document.addEventListener("pointerdown", function (e) {
-    if (e.target && e.target.closest && e.target.closest(".btn")) return;
-    burstAt(e.clientX, e.clientY);
-  }, { passive: true });
+  /* =========================================================
+   *  3. 鼠标光晕 + 3D 透视视差
+   * ========================================================= */
+  var glow = byId("glow");
+  var tree = byId("tree");
+  var stageEl = byId("stage");
 
-  /* 「撒一把雪」按钮：整屏顶部再补一场雪 */
-  var snowBtn = document.getElementById("snowBtn");
-  if (snowBtn) {
-    snowBtn.addEventListener("click", function () {
-      for (var i = 0; i < 120; i++) {
-        flakes.push(makeFlake(Math.random() * W, rand(-H * 0.9, -10)));
-      }
-      if (flakes.length > 620) flakes.splice(0, flakes.length - 620);
+  var mouseX = 0, mouseY = 0;      /* 目标值 */
+  var curX = 0, curY = 0;          /* 平滑值 */
+  var glowActive = false;
+  var pointerIsCoarse = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+
+  function onPointerMove(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    if (!glowActive && glow && !pointerIsCoarse) {
+      glowActive = true;
+      document.body.classList.add("has-pointer");
+      curX = mouseX; curY = mouseY;
+    }
+  }
+
+  document.addEventListener("pointermove", onPointerMove, { passive: true });
+  document.addEventListener("pointerdown", onPointerMove, { passive: true });
+
+  var parallaxOn = !reduced && !pointerIsCoarse;
+
+  function parallaxTick() {
+    if (!parallaxOn) return;
+
+    curX += (mouseX - curX) * 0.12;
+    curY += (mouseY - curY) * 0.12;
+
+    if (glow) {
+      glow.style.transform = "translate3d(" + curX.toFixed(1) + "px," + curY.toFixed(1) + "px,0)";
+    }
+
+    var nx = (curX / W - 0.5) * 2;    /* -1 ~ 1 */
+    var ny = (curY / H - 0.5) * 2;
+
+    if (tree) {
+      tree.style.setProperty("--ty", (nx * 9).toFixed(2) + "deg");
+      tree.style.setProperty("--tx", (ny * -7 - 5).toFixed(2) + "deg");
+    }
+    if (stageEl) {
+      stageEl.style.setProperty("--px", (nx * -6).toFixed(2) + "px");
+    }
+
+    window.requestAnimationFrame(parallaxTick);
+  }
+
+  /* =========================================================
+   *  4. 打字机祝福语
+   * ========================================================= */
+  var typedEl = byId("typed");
+  var LINES = [
+    "愿圣诞的灯火，照亮你的每一个小小愿望；",
+    "愿新年的钟声，为你敲来满满的好运与欢笑；",
+    "愿你被这世界温柔以待，所求皆如愿。"
+  ];
+  var tRow = 0, tCol = 0, rowsBuf = ["", "", ""], tTimer = 0;
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, function (m) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[m];
     });
   }
 
-  /* ============================================================
-   *  3. WebAudio 合成「Jingle Bells」（无任何外部音频文件）
-   * ============================================================ */
-  var bellBtn = document.getElementById("bellBtn");
+  function paintTyped() {
+    if (!typedEl) return;
+    var html = "";
+    var i;
+
+    if (tRow >= LINES.length) {
+      for (i = 0; i < LINES.length; i++) {
+        html += escapeHtml(LINES[i]);
+        if (i < LINES.length - 1) html += "<br />";
+      }
+      typedEl.innerHTML = html;
+      return;
+    }
+
+    for (i = 0; i < LINES.length; i++) {
+      if (i < tRow) {
+        html += escapeHtml(LINES[i]) + "<br />";
+      } else if (i === tRow) {
+        html += escapeHtml(rowsBuf[i] || "") + '<span class="caret"></span>';
+      }
+    }
+    typedEl.innerHTML = html;
+  }
+
+  function typeTick() {
+    if (tRow >= LINES.length) return;
+
+    var line = LINES[tRow];
+    tCol++;
+    rowsBuf[tRow] = line.slice(0, tCol);
+    paintTyped();
+
+    var delay = 44;
+    var ch = line.charAt(tCol - 1);
+    if (ch === "，" || ch === "；") delay = 250;
+    else if (ch === "。") delay = 420;
+
+    if (tCol >= line.length) {
+      tRow++;
+      tCol = 0;
+      delay = 240;
+      if (tRow >= LINES.length) { paintTyped(); return; }
+    }
+    tTimer = window.setTimeout(typeTick, delay);
+  }
+
+  function startTyping() {
+    if (!typedEl) return;
+    if (reduced) {
+      tRow = LINES.length;
+      paintTyped();
+      return;
+    }
+    paintTyped();
+    tTimer = window.setTimeout(typeTick, 620);
+  }
+
+  /* =========================================================
+   *  5. WebAudio 合成「Jingle Bells」（无外部音频）
+   * ========================================================= */
+  var bellBtn = byId("bellBtn");
   var actx = null, master = null, playing = false, playTimer = 0;
 
-  /* [频率, 时值(秒)] —— Jingle Bells 主旋律 */
   var SONG = (function () {
     var E5 = 659.25, D5 = 587.33, C5 = 523.25, F5 = 698.46, G5 = 783.99, G4 = 392.00;
     var q = 0.26, h = 0.52;
@@ -539,7 +1058,6 @@
       [E5, q], [E5, q], [E5, h],
       [E5, q], [E5, q], [E5, h],
       [E5, q], [G5, q], [C5, q], [D5, q], [E5, h * 2],
-
       [F5, q], [F5, q], [F5, q], [F5, q],
       [F5, q], [E5, q], [E5, q], [E5, q],
       [E5, q], [D5, q], [D5, q], [E5, q], [D5, h], [G4, h]
@@ -581,9 +1099,9 @@
 
     for (var i = 0; i < SONG.length; i++) {
       var freq = SONG[i][0], dur = SONG[i][1];
-
       var osc = actx.createOscillator();
       var env = actx.createGain();
+
       osc.type = "triangle";
       osc.frequency.setValueAtTime(freq, t);
 
@@ -627,37 +1145,124 @@
     });
   }
 
-  /* ============================================================
-   *  4. 启动
-   * ============================================================ */
-  buildLights();
-  resize();
+  /* =========================================================
+   *  6. 撒雪按钮 + 点击爆雪
+   * ========================================================= */
+  var snowBtn = byId("snowBtn");
 
+  if (snowBtn) {
+    snowBtn.addEventListener("click", function () {
+      if (!flakes) return;
+      for (var i = 0; i < (QUALITY === "low" ? 40 : 130); i++) {
+        flakes.push(makeFlake(pickLayer(), Math.random() * W, rand(-H * 0.9, -10)));
+      }
+      if (flakes.length > 700) flakes.splice(0, flakes.length - 700);
+    });
+  }
+
+  document.addEventListener("pointerdown", function (e) {
+    if (e.target && e.target.closest && e.target.closest(".btn")) return;
+    if (CFG.flakes === 0) return;
+    burstAt(e.clientX, e.clientY);
+  }, { passive: true });
+
+  /* =========================================================
+   *  7. 滚动进场微交互
+   * ========================================================= */
+  var reveals = document.querySelectorAll(".reveal");
+
+  function initReveal() {
+    if (!reveals.length) return;
+
+    if (!("IntersectionObserver" in window) || reduced) {
+      for (var i = 0; i < reveals.length; i++) reveals[i].classList.add("in");
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var el = en.target;
+        var idx = Array.prototype.indexOf.call(reveals, el);
+        el.style.transitionDelay = Math.min(idx, 4) * 90 + "ms";
+        el.classList.add("in");
+        io.unobserve(el);
+      });
+    }, { threshold: 0.18, rootMargin: "0px 0px -8% 0px" });
+
+    for (var j = 0; j < reveals.length; j++) io.observe(reveals[j]);
+  }
+
+  /* =========================================================
+   *  8. 入场加载
+   * ========================================================= */
+  var loader = byId("loader");
+
+  function hideLoader() {
+    if (loader) loader.classList.add("hide");
+    document.body.classList.remove("arming");
+    document.body.classList.add("ready");
+    startTyping();
+    window.setTimeout(function () {
+      if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+    }, 900);
+  }
+
+  /* =========================================================
+   *  9. 启动
+   * ========================================================= */
+  document.body.classList.add("arming");
+
+  buildLights();
+  if (ctx) buildSprites();
+  resize();
+  initReveal();
+
+  if (ctx) {
+    if (reduced) {
+      drawStars(0);
+      drawFlakes();
+      if (CFG.dust) drawDust(0);
+    } else {
+      rafId = window.requestAnimationFrame(loop);
+      if (parallaxOn) window.requestAnimationFrame(parallaxTick);
+    }
+  }
+
+  /* 兜底：图片/字体等资源加载完后收起加载层，最长 2.6 秒强制收起 */
+  var loaderDone = false;
+  function finishLoading() {
+    if (loaderDone) return;
+    loaderDone = true;
+    hideLoader();
+  }
+
+  if (document.readyState === "complete") {
+    window.setTimeout(finishLoading, reduced ? 0 : 420);
+  } else {
+    window.addEventListener("load", function () {
+      window.setTimeout(finishLoading, reduced ? 0 : 420);
+    }, { once: true });
+  }
+  window.setTimeout(finishLoading, 2600);
+
+  /* 窗口尺寸变化 */
   var resizeTimer = 0;
   window.addEventListener("resize", function () {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(resize, 180);
   });
-
   window.addEventListener("orientationchange", function () {
     window.setTimeout(resize, 260);
   });
 
-  if (ctx && !reduced) {
-    rafId = window.requestAnimationFrame(loop);
-  } else if (ctx) {
-    /* 减少动效偏好：只静态渲染一帧 */
-    drawStars(0);
-    drawFlakes();
-  }
-
-  /* 页面隐藏时暂停动画，省电 */
+  /* 页面隐藏时暂停渲染，省电 */
   document.addEventListener("visibilitychange", function () {
-    if (!ctx) return;
+    if (!ctx || reduced) return;
     if (document.hidden) {
       window.cancelAnimationFrame(rafId);
       rafId = 0;
-    } else if (!rafId && !reduced) {
+    } else if (!rafId) {
       rafId = window.requestAnimationFrame(loop);
     }
   });
