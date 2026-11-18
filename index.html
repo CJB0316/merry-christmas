@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#050b18" />
+<meta name="description" content="Merry Christmas —— 给吴芷燕的圣诞祝福" />
+<meta property="og:title" content="Merry Christmas · 吴芷燕" />
+<meta property="og:description" content="愿圣诞的灯火，照亮你的每一个小小愿望。" />
+<title>Merry Christmas · 吴芷燕</title>
+<style>
+  :root{
+    --gold:#ffd76e;
+    --gold-soft:#ffe9b0;
+    --red:#ff4d5e;
+    --green:#37d07a;
+    --ink:#e9f1ff;
+    --muted:rgba(215,230,255,.62);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+
+  html{ -webkit-text-size-adjust:100%; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    min-height:100svh;
+    overflow-x:hidden;
+    color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC",
+                "Microsoft YaHei", "Hiragino Sans GB", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    background:
+      radial-gradient(1200px 700px at 50% -12%, #12315c 0%, rgba(18,49,92,0) 62%),
+      radial-gradient(900px 620px at 12% 108%, #0a2b3a 0%, rgba(10,43,58,0) 60%),
+      radial-gradient(760px 520px at 92% 96%, #2a1030 0%, rgba(42,16,48,0) 62%),
+      linear-gradient(180deg, #061225 0%, #050b18 55%, #03060d 100%);
+    background-attachment:fixed;
+  }
+
+  /* ---------- 背景层：飘雪 + 星光 ---------- */
+  #bg{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  .aurora{
+    position:fixed;
+    inset:-10%;
+    z-index:0;
+    pointer-events:none;
+    background:
+      radial-gradient(560px 300px at 22% 24%, rgba(90,225,185,.13), transparent 70%),
+      radial-gradient(520px 280px at 78% 16%, rgba(255,120,150,.12), transparent 70%),
+      radial-gradient(620px 320px at 60% 82%, rgba(120,160,255,.10), transparent 72%);
+    filter:blur(14px);
+    animation:auroraShift 16s ease-in-out infinite alternate;
+  }
+  @keyframes auroraShift{
+    from{ opacity:.72; transform:translate3d(0,0,0) scale(1); }
+    to  { opacity:1;   transform:translate3d(0,-16px,0) scale(1.04); }
+  }
+
+  /* ---------- 主舞台 ---------- */
+  .stage{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    min-height:100svh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:34px;
+    padding:clamp(28px,6vw,64px) 20px 110px;
+    text-align:center;
+  }
+
+  /* ---------- 圣诞树 ---------- */
+  .tree-col{ display:flex; align-items:flex-end; justify-content:center; }
+
+  .tree{
+    position:relative;
+    width:min(58vw, 236px);
+    aspect-ratio:1 / 1.28;
+    filter:drop-shadow(0 22px 42px rgba(0,0,0,.55));
+    flex:0 0 auto;
+  }
+
+  .tier{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    clip-path:polygon(50% 0%, 100% 100%, 0% 100%);
+    background:linear-gradient(180deg, #37d07a 0%, #1f9e58 55%, #137a43 100%);
+  }
+  .tier1{ top:6%;  width:46%; height:33%; }
+  .tier2{ top:26%; width:70%; height:35%; background:linear-gradient(180deg,#44dc88 0%,#23a95f 55%,#158047 100%); }
+  .tier3{ top:50%; width:96%; height:40%; background:linear-gradient(180deg,#4de890 0%,#27b265 55%,#17874a 100%); }
+
+  .trunk{
+    position:absolute;
+    bottom:1.4%;
+    left:50%;
+    transform:translateX(-50%);
+    width:11%;
+    height:12%;
+    border-radius:3px 3px 2px 2px;
+    background:linear-gradient(180deg,#8a5a34,#5b3a20);
+  }
+
+  .star{
+    position:absolute;
+    top:-2%;
+    left:50%;
+    width:15%;
+    aspect-ratio:1;
+    transform:translateX(-50%);
+    background:radial-gradient(circle at 50% 50%, #fffbe8 0%, #ffd76e 58%, #f0a92c 100%);
+    clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    filter:drop-shadow(0 0 12px rgba(255,215,110,.95));
+    animation:twinkle 2.2s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{ transform:translateX(-50%) scale(1);    opacity:1; }
+    50%    { transform:translateX(-50%) scale(1.16); opacity:.8; }
+  }
+
+  .lights{ position:absolute; inset:0; pointer-events:none; }
+  .light{
+    position:absolute;
+    aspect-ratio:1;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    animation:flick 2.2s ease-in-out infinite;
+  }
+  @keyframes flick{
+    0%,100%{ opacity:.5;  filter:brightness(.85); }
+    50%    { opacity:1;   filter:brightness(1.5); }
+  }
+
+  /* ---------- 文案区 ---------- */
+  .text-col{ max-width:min(100%, 560px); }
+
+  .eyebrow{
+    margin:0 0 14px;
+    font-size:clamp(.62rem, 2.3vw, .74rem);
+    letter-spacing:.42em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+
+  .title{
+    margin:0;
+    font-size:clamp(2rem, 9.2vw, 4rem);
+    line-height:1.06;
+    font-weight:800;
+    letter-spacing:.01em;
+    background:linear-gradient(100deg,#ffffff 0%, #ffe9b0 32%, #ffc95c 48%, #ffffff 66%, #ffe9b0 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 20px rgba(255,205,110,.42));
+    animation:shine 7s linear infinite;
+  }
+  @keyframes shine{ to{ background-position:220% 0; } }
+
+  .subtitle{
+    margin:12px 0 26px;
+    font-size:clamp(.9rem, 3.4vw, 1.2rem);
+    letter-spacing:.62em;
+    text-indent:.62em;
+    color:#cfe3ff;
+    opacity:.86;
+  }
+
+  .name-card{
+    display:inline-flex;
+    align-items:center;
+    gap:.6em;
+    margin:0 0 24px;
+    padding:.5em 1.35em;
+    border-radius:999px;
+    white-space:nowrap;
+    background:linear-gradient(135deg, rgba(255,215,110,.17), rgba(255,90,110,.14));
+    border:1px solid rgba(255,215,110,.42);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    animation:breathe 3.4s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ box-shadow:0 0 30px rgba(255,200,90,.18), inset 0 0 22px rgba(255,255,255,.05); }
+    50%    { box-shadow:0 0 58px rgba(255,200,90,.4),  inset 0 0 30px rgba(255,255,255,.11); }
+  }
+
+  .name-card .to{
+    font-size:clamp(.78rem, 2.6vw, .92rem);
+    letter-spacing:.26em;
+    color:var(--gold);
+    opacity:.92;
+  }
+
+  .name-card .name{
+    font-size:clamp(1.5rem, 6vw, 2.3rem);
+    font-weight:800;
+    letter-spacing:.14em;
+    background:linear-gradient(180deg,#fff8e1 0%, #ffd76e 58%, #f0a92c 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 16px rgba(255,200,90,.5));
+  }
+
+  .bless{
+    margin:0 0 28px;
+    font-size:clamp(.9rem, 3.3vw, 1.06rem);
+    line-height:2.05;
+    color:#d7e6ff;
+    opacity:.94;
+  }
+
+  .actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:center;
+  }
+
+  .btn{
+    -webkit-appearance:none;
+    appearance:none;
+    cursor:pointer;
+    font:inherit;
+    font-size:clamp(.8rem, 2.9vw, .9rem);
+    padding:.72em 1.3em;
+    border-radius:999px;
+    color:#eaf6ff;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.2);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    transition:transform .22s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease;
+  }
+  .btn:hover{
+    background:rgba(255,215,110,.17);
+    border-color:rgba(255,215,110,.55);
+    transform:translateY(-2px);
+    box-shadow:0 12px 26px rgba(0,0,0,.35);
+  }
+  .btn:active{ transform:translateY(0) scale(.98); }
+  .btn:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
+
+  footer{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    z-index:2;
+    padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+    text-align:center;
+    font-size:clamp(.68rem, 2.4vw, .76rem);
+    letter-spacing:.1em;
+    color:rgba(215,230,255,.5);
+    pointer-events:none;
+  }
+
+  /* ---------- 桌面宽屏：左右布局 ---------- */
+  @media (min-width:900px){
+    .stage{
+      flex-direction:row;
+      justify-content:center;
+      align-items:center;
+      gap:clamp(48px, 6vw, 92px);
+      text-align:left;
+      padding:48px 64px 110px;
+    }
+    .tree{ width:clamp(240px, 24vw, 330px); }
+    .text-col{ max-width:560px; }
+    .actions{ justify-content:flex-start; }
+    .eyebrow{ margin-bottom:16px; }
+  }
+
+  @media (min-width:1280px){
+    .tree{ width:clamp(280px, 22vw, 360px); }
+  }
+
+  /* ---------- 无障碍：减少动效偏好 ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="aurora" aria-hidden="true"></div>
+
+<main class="stage">
+  <section class="tree-col" aria-hidden="true">
+    <div class="tree">
+      <div class="star"></div>
+      <div class="tier tier3"></div>
+      <div class="tier tier2"></div>
+      <div class="tier tier1"></div>
+      <div class="trunk"></div>
+      <div class="lights" id="lights"></div>
+    </div>
+  </section>
+
+  <section class="text-col">
+    <p class="eyebrow">2026 · Christmas</p>
+    <h1 class="title">Merry Christmas</h1>
+    <p class="subtitle">圣诞快乐</p>
+
+    <div class="name-card">
+      <span class="to">To</span>
+      <span class="name">吴芷燕</span>
+    </div>
+
+    <p class="bless">
+      愿圣诞的灯火，照亮你的每一个小小愿望；<br />
+      愿新年的钟声，为你敲来满满的好运与欢笑；<br />
+      愿你被这世界温柔以待，所求皆如愿。
+    </p>
+
+    <div class="actions">
+      <button id="snowBtn" class="btn" type="button">❄ 撒一把雪</button>
+      <button id="bellBtn" class="btn" type="button">🔔 铃儿响叮当</button>
+    </div>
+  </section>
+</main>
+
+<footer>Merry Christmas &amp; Happy New Year · 为 吴芷燕 定制</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================================================
+   *  1. 圣诞树彩灯：按三角形包络随机布置
+   * ============================================================ */
+  var lightsBox = document.getElementById("lights");
+  var PALETTE = ["#ff4d5e", "#ffd76e", "#7ef1c8", "#8ab6ff", "#ff9ad5", "#fff2c0"];
+
+  function buildLights() {
+    if (!lightsBox) return;
+    lightsBox.innerHTML = "";
+
+    var rows = 8;
+    for (var r = 0; r < rows; r++) {
+      var t = (r + 1) / rows;          /* 0.125 ~ 1，自上而下 */
+      var yPct = 8 + t * 80;           /* 8% ~ 88% */
+      var halfW = 46 * t;              /* 该高度处三角形半宽（%） */
+      var count = 1 + Math.round(t * 4);
+
+      for (var i = 0; i < count; i++) {
+        var rel = count === 1 ? 0 : (i / (count - 1)) * 2 - 1;
+        var xPct = 50 + rel * halfW * 0.84;
+
+        var dot = document.createElement("span");
+        dot.className = "light";
+        dot.style.left = xPct.toFixed(2) + "%";
+        dot.style.top = yPct.toFixed(2) + "%";
+        dot.style.width = (2 + Math.random() * 1.5).toFixed(2) + "%";
+        dot.style.color = PALETTE[(Math.random() * PALETTE.length) | 0];
+        dot.style.background = "currentColor";
+        dot.style.boxShadow = "0 0 9px currentColor";
+        dot.style.animationDelay = (Math.random() * 2.2).toFixed(2) + "s";
+        dot.style.animationDuration = (1.7 + Math.random() * 1.5).toFixed(2) + "s";
+        lightsBox.appendChild(dot);
+      }
+    }
+  }
+
+  /* ============================================================
+   *  2. Canvas 背景：闪烁星光 + 飘雪
+   * ============================================================ */
+  var canvas = document.getElementById("bg");
+  var ctx = canvas && canvas.getContext ? canvas.getContext("2d") : null;
+  var W = 0, H = 0, DPR = 1;
+  var stars = [], flakes = [];
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function buildStars() {
+    stars = [];
+    var n = Math.min(240, Math.round((W * H) / 8200));
+    for (var i = 0; i < n; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: rand(0.35, 1.35),
+        phase: Math.random() * Math.PI * 2,
+        speed: rand(0.6, 2.0),
+        hue: Math.random() < 0.22 ? "255,236,180" : "225,238,255"
+      });
+    }
+  }
+
+  function makeFlake(fromX, fromY, burst) {
+    return {
+      x: fromX === undefined ? Math.random() * W : fromX,
+      y: fromY === undefined ? Math.random() * H - H : fromY,
+      r: burst ? rand(1.0, 2.8) : rand(0.6, 2.6),
+      sp: rand(0.5, 1.5),
+      sway: rand(0.3, 1.1),
+      seed: Math.random() * 1000,
+      alpha: rand(0.35, 0.95),
+      vx: burst ? rand(-3.2, 3.2) : 0,
+      vy: burst ? rand(-4.2, -0.8) : 0,
+      g: burst ? 0.09 : 0
+    };
+  }
+
+  function buildFlakes() {
+    flakes = [];
+    var n = Math.min(170, Math.max(40, Math.round(W / 9)));
+    for (var i = 0; i < n; i++) flakes.push(makeFlake());
+  }
+
+  function resetFlake(f) {
+    f.x = Math.random() * W;
+    f.y = -rand(4, 60);
+    f.r = rand(0.6, 2.6);
+    f.sp = rand(0.5, 1.5);
+    f.sway = rand(0.3, 1.1);
+    f.alpha = rand(0.35, 0.95);
+    f.vx = 0;
+    f.vy = 0;
+    f.g = 0;
+  }
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    if (!canvas || !ctx) return;
+
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    buildStars();
+    buildFlakes();
+  }
+
+  function drawStars(ts) {
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      var tw = reduced ? 0.8 : (0.32 + 0.68 * Math.abs(Math.sin(ts * 0.001 * s.speed + s.phase)));
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(" + s.hue + "," + tw.toFixed(3) + ")";
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawFlakes() {
+    ctx.fillStyle = "#ffffff";
+    for (var i = 0; i < flakes.length; i++) {
+      var f = flakes[i];
+
+      /* 物理更新 */
+      if (f.g) {
+        f.vy += f.g;
+        f.x += f.vx;
+        f.y += f.vy;
+        f.vx *= 0.985;
+      } else {
+        f.y += f.sp;
+        f.x += Math.sin((f.y + f.seed) / 70) * f.sway * 0.6;
+      }
+
+      if (f.y > H + 12 || f.x < -30 || f.x > W + 30) resetFlake(f);
+
+      ctx.globalAlpha = f.alpha;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  var rafId = 0;
+  function loop(ts) {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, W, H);
+    drawStars(ts || 0);
+    drawFlakes();
+    rafId = window.requestAnimationFrame(loop);
+  }
+
+  /* 点击 / 触摸位置爆开一把雪 */
+  function burstAt(x, y) {
+    for (var i = 0; i < 26; i++) flakes.push(makeFlake(x + rand(-14, 14), y + rand(-14, 14), true));
+    if (flakes.length > 520) flakes.splice(0, flakes.length - 520);
+  }
+
+  document.addEventListener("pointerdown", function (e) {
+    if (e.target && e.target.closest && e.target.closest(".btn")) return;
+    burstAt(e.clientX, e.clientY);
+  }, { passive: true });
+
+  /* 「撒一把雪」按钮：整屏顶部再补一场雪 */
+  var snowBtn = document.getElementById("snowBtn");
+  if (snowBtn) {
+    snowBtn.addEventListener("click", function () {
+      for (var i = 0; i < 120; i++) {
+        flakes.push(makeFlake(Math.random() * W, rand(-H * 0.9, -10)));
+      }
+      if (flakes.length > 620) flakes.splice(0, flakes.length - 620);
+    });
+  }
+
+  /* ============================================================
+   *  3. WebAudio 合成「Jingle Bells」（无任何外部音频文件）
+   * ============================================================ */
+  var bellBtn = document.getElementById("bellBtn");
+  var actx = null, master = null, playing = false, playTimer = 0;
+
+  /* [频率, 时值(秒)] —— Jingle Bells 主旋律 */
+  var SONG = (function () {
+    var E5 = 659.25, D5 = 587.33, C5 = 523.25, F5 = 698.46, G5 = 783.99, G4 = 392.00;
+    var q = 0.26, h = 0.52;
+    return [
+      [E5, q], [E5, q], [E5, h],
+      [E5, q], [E5, q], [E5, h],
+      [E5, q], [G5, q], [C5, q], [D5, q], [E5, h * 2],
+
+      [F5, q], [F5, q], [F5, q], [F5, q],
+      [F5, q], [E5, q], [E5, q], [E5, q],
+      [E5, q], [D5, q], [D5, q], [E5, q], [D5, h], [G4, h]
+    ];
+  })();
+
+  function stopMusic() {
+    window.clearTimeout(playTimer);
+    if (master && actx) {
+      try {
+        var now = actx.currentTime;
+        master.gain.cancelScheduledValues(now);
+        master.gain.setValueAtTime(master.gain.value, now);
+        master.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+      } catch (err) { /* ignore */ }
+    }
+    var old = master;
+    window.setTimeout(function () {
+      if (old) { try { old.disconnect(); } catch (e) {} }
+    }, 380);
+    master = null;
+    playing = false;
+    if (bellBtn) bellBtn.textContent = "🔔 铃儿响叮当";
+  }
+
+  function startMusic() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+
+    if (!actx) actx = new AC();
+    if (actx.state === "suspended" && actx.resume) actx.resume();
+
+    master = actx.createGain();
+    master.gain.value = 0.85;
+    master.connect(actx.destination);
+
+    var t = actx.currentTime + 0.08;
+    var total = 0;
+
+    for (var i = 0; i < SONG.length; i++) {
+      var freq = SONG[i][0], dur = SONG[i][1];
+
+      var osc = actx.createOscillator();
+      var env = actx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, t);
+
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.92);
+
+      osc.connect(env);
+      env.connect(master);
+      osc.start(t);
+      osc.stop(t + dur);
+
+      t += dur;
+      total += dur;
+    }
+
+    playing = true;
+    if (bellBtn) bellBtn.textContent = "⏸ 停止音乐";
+
+    playTimer = window.setTimeout(function () {
+      if (!playing) return;
+      var m = master;
+      master = null;
+      playing = false;
+      if (bellBtn) bellBtn.textContent = "🔔 铃儿响叮当";
+      window.setTimeout(function () { if (m) { try { m.disconnect(); } catch (e) {} } }, 200);
+    }, Math.round(total * 1000) + 200);
+
+    return true;
+  }
+
+  if (bellBtn) {
+    bellBtn.addEventListener("click", function () {
+      try {
+        if (playing) { stopMusic(); return; }
+        startMusic();
+      } catch (err) {
+        bellBtn.textContent = "🔔 音乐不可用";
+        playing = false;
+      }
+    });
+  }
+
+  /* ============================================================
+   *  4. 启动
+   * ============================================================ */
+  buildLights();
+  resize();
+
+  var resizeTimer = 0;
+  window.addEventListener("resize", function () {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(resize, 180);
+  });
+
+  window.addEventListener("orientationchange", function () {
+    window.setTimeout(resize, 260);
+  });
+
+  if (ctx && !reduced) {
+    rafId = window.requestAnimationFrame(loop);
+  } else if (ctx) {
+    /* 减少动效偏好：只静态渲染一帧 */
+    drawStars(0);
+    drawFlakes();
+  }
+
+  /* 页面隐藏时暂停动画，省电 */
+  document.addEventListener("visibilitychange", function () {
+    if (!ctx) return;
+    if (document.hidden) {
+      window.cancelAnimationFrame(rafId);
+      rafId = 0;
+    } else if (!rafId && !reduced) {
+      rafId = window.requestAnimationFrame(loop);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
