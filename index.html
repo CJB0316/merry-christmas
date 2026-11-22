@@ -384,12 +384,13 @@ function detectQuality(){
   if(cores <= 2 && tier > 0) tier = 0;
   if(mem <= 2 && tier > 0) tier = 0;
 
-  var n, dprMax;
-  if(tier === 0){ n = 1200; dprMax = 1.5; }
-  else if(tier === 1){ n = 2000; dprMax = 1.75; }
-  else { n = 3400; dprMax = 2; }
+  var n;
+  if(tier === 0){ n = 1200; }
+  else if(tier === 1){ n = 2000; }
+  else { n = 3400; }
 
-  if(isMobileNow() && dprMax > 1.5) dprMax = 1.5;
+  /* 清晰度优先：不再按移动端压到 1.5，统一上限 2 */
+  var dprMax = 2;
 
   QUALITY.tier = tier;
   QUALITY.N = n;
@@ -399,13 +400,16 @@ function detectQuality(){
 
 function dprCap(){
   var d = window.devicePixelRatio || 1;
-  return Math.min(d, QUALITY.dprMax || 2);
+  /* 上限 2：390x844@dpr2 渲染 780x1688 物理像素，避免放大虚化 */
+  return Math.min(d, 2);
 }
 
 /* ---------- 布局：树体 / 地平线 / 文字宽度随视口等比适配 ---------- */
 var LAY = {
   w: 0, h: 0, aspect: 1, xScale: 1,
   base: -0.92, hgt: 1.78, rmax: 0.52,
+  arcBase: -0.30, arcK: 0.62, treeTop: 0.52,
+  portraitPhone: false,
   unit: 1, cx: 0, cy: 0,
   textW: 1.24
 };
@@ -416,7 +420,8 @@ function computeLayout(){
   var aspect = w / h;
   if(!isFinite(aspect) || aspect <= 0) aspect = 1;
 
-  var xScale = clamp(aspect, 0.72, 1.0);
+  /* 手机竖屏：宽高比 < 0.75 */
+  var portraitPhone = aspect < 0.75;
 
   /* 顶部标题 / 底部按钮占位（NDC 半高比例） */
   var topPad = 0.16, botPad = 0.12;
@@ -427,19 +432,43 @@ function computeLayout(){
   var availBot = -1 + 2 * botPad;
   var availH = Math.max(0.6, availTop - availBot);
 
-  var hgt = Math.min(CFG.TREE_H, availH * 0.96);
-  var base = availBot + (availH - hgt) * 0.35;
+  /* ---------- 树高：唯一缩放来源（像素） ---------- */
+  var hgtPx;
+  if(portraitPhone){
+    hgtPx = h * 0.60;                        /* 手机竖屏：视口高 52% */
+  }else{
+    var hgtNdc = Math.min(1.78, availH * 0.96);
+    hgtPx = hgtNdc * (h / 2);                /* 平板 / 桌面：沿用原比例 */
+  }
+  var maxPx = availH * (h / 2) * 0.98;
+  if(hgtPx > maxPx) hgtPx = maxPx;
 
-  /* 树宽不超过视口宽度的 46%（NDC 半宽） */
-  var rmax = Math.min(CFG.TREE_R, 0.46 / xScale);
+  var hgt = hgtPx / (h / 2);                 /* NDC-y 高度 */
+
+  /* ---------- 树底半径 = 树高 × 0.36（像素等比） ---------- */
+  var rmax = hgt * 0.36;                     /* NDC-y 单位 */
+  var xScale = 1 / aspect;                   /* NDC-x 换算，保证像素宽高比恒定 */
+
+  /* ---------- 地平线弧顶（像素） ---------- */
+  var horizonPx = portraitPhone ? h * 0.72 : h * 0.65;
+  var arcBase = (h / 2 - horizonPx) / (h / 2);
+  var arcK = portraitPhone ? 0.44 : 0.62;
+
+  /* ---------- 树底位置（像素） ---------- */
+  var basePx = portraitPhone ? h * 0.72 : h * 0.96;
+  var base = (h / 2 - basePx) / (h / 2);
 
   /* 粒子文字宽度：宽屏限制最大像素宽度，避免无限放大 */
   var textW = Math.min(1.24, (2 * 1100) / w);
+  if(portraitPhone) textW = Math.min(1.10, textW);
   if(textW < 0.72) textW = 0.72;
 
   LAY.w = w; LAY.h = h; LAY.aspect = aspect;
+  LAY.portraitPhone = portraitPhone;
   LAY.xScale = xScale;
   LAY.base = base; LAY.hgt = hgt; LAY.rmax = rmax;
+  LAY.arcBase = arcBase; LAY.arcK = arcK;
+  LAY.treeTop = base + hgt;
   LAY.unit = h / 2; LAY.cx = w / 2; LAY.cy = h / 2;
   LAY.textW = textW;
 
@@ -484,6 +513,9 @@ var FS_BG = [
   'uniform float u_aspect;',
   'uniform float u_burst;',
   'uniform float u_horizon;',
+  'uniform float u_arcBase;',
+  'uniform float u_arcK;',
+  'uniform float u_treeTop;',
   '',
   'float hash(vec2 p){',
   '  p = fract(p * vec2(123.34, 456.21));',
@@ -513,7 +545,7 @@ var FS_BG = [
   '    col += vec3(1.0, 0.98, 0.94) * star * 0.9;',
   '  }',
   '',
-  '  float arcY = -0.30 - 0.62 * ndcX * ndcX;',
+  '  float arcY = u_arcBase - u_arcK * ndcX * ndcX;',
   '  float inG  = smoothstep(0.012, -0.012, ndcY - arcY);',
   '  float depth = clamp((arcY - ndcY) / 0.75, 0.0, 1.0);',
   '  vec3 sand = mix(vec3(0.760, 0.700, 0.502), vec3(0.105, 0.082, 0.058), depth);',
@@ -522,7 +554,7 @@ var FS_BG = [
   '  float rim = smoothstep(0.055, 0.0, abs(ndcY - arcY));',
   '  col += vec3(0.937, 0.894, 0.820) * rim * 0.62 * u_horizon;',
   '',
-  '  float gd = length(vec2(ndcX, ndcY - 0.66));',
+  '  float gd = length(vec2(ndcX, ndcY - (u_treeTop + 0.14)));',
   '  float pulse = 0.62 + 0.38 * sin(u_time * 1.75);',
   '  col += vec3(1.0, 0.72, 0.26) * exp(-gd * 3.4) * 0.52 * pulse;',
   '  col += vec3(1.0, 0.95, 0.86) * exp(-gd * 7.0) * u_burst * 1.7;',
@@ -606,6 +638,9 @@ function initGL(){
   bgLoc.u_aspect  = gl.getUniformLocation(bgProg, 'u_aspect');
   bgLoc.u_burst   = gl.getUniformLocation(bgProg, 'u_burst');
   bgLoc.u_horizon = gl.getUniformLocation(bgProg, 'u_horizon');
+  bgLoc.u_arcBase = gl.getUniformLocation(bgProg, 'u_arcBase');
+  bgLoc.u_arcK    = gl.getUniformLocation(bgProg, 'u_arcK');
+  bgLoc.u_treeTop = gl.getUniformLocation(bgProg, 'u_treeTop');
 
   ptProg = buildProgram(VS_PT, FS_PT);
   ptLoc.a_pos   = gl.getAttribLocation(ptProg, 'a_pos');
@@ -775,11 +810,17 @@ function buildTextSets(){
 
   TEXT_SETS = {};
 
-  /* 倒计时数字 */
+  /* 倒计时数字：手机竖屏放大到视口宽 55%~60%，桌面保持原尺寸 */
   var nums = ['3', '2', '1'];
+  var numW = Math.min(0.42, LAY.textW * 0.34);
+  var numY = 0.02;
+  if(LAY.portraitPhone){
+    numW = 2.50;     /* 字形墨迹实宽约 58% 视口宽（advance 含 side bearing） */
+    numY = 0.0;      /* 居中，与树顶泛光保持安全间距 */
+  }
   for(var i = 0; i < nums.length; i++){
     var sn = sampleText(nums[i], fs * 1.35, FONT_NUM, step + 1);
-    if(sn) TEXT_SETS['num' + i] = mapPts(sn, Math.min(0.42, LAY.textW * 0.34), aspect, 0.02);
+    if(sn) TEXT_SETS['num' + i] = mapPts(sn, numW, aspect, numY);
   }
 
   /* 姓名 */
@@ -932,9 +973,16 @@ function updateParticles(time){
   var grow = ST.grow;
   var textW = ST.textW, nebW = ST.nebW;
 
+  /* 倒计时：数字粒子放大提亮，树体整体压暗约 40% */
+  var isCount = (ST.phase === 'count') && LAY.portraitPhone;
+  var dimTree = isCount ? (1 - 0.40 * textW) : 1;
+  var numBoost = LAY.portraitPhone ? 1.4 : 1.0;
+
   var BASE = CFG.TREE_BASE;
   var HGT  = CFG.TREE_H;
   var RMAX = CFG.TREE_R;
+  /* 透视系数按 RMAX 归一化：手机/桌面透视放大一致 */
+  var PK = 0.55 * (0.36 / (RMAX || 0.36));
 
   for(var i = 0; i < N; i++){
     var t = P.t[i];
@@ -943,7 +991,7 @@ function updateParticles(time){
     var wx = Math.cos(ang) * rad * xScale;
     var wy = BASE + t * HGT * grow;
     var wz = Math.sin(ang) * rad;
-    var persp = 1 / (1 + wz * 0.55);
+    var persp = 1 / (1 + wz * PK);
 
     var tx = wx * persp;
     var ty = wy;
@@ -951,13 +999,30 @@ function updateParticles(time){
     var tal = P.al[i] * (0.55 + 0.45 * persp) * breathe;
 
     var x = tx, y = ty, sz = tsz, al = tal;
+    var cr = colBuf[i * 3], cg = colBuf[i * 3 + 1], cb = colBuf[i * 3 + 2];
 
     /* 文字聚合 */
     if(textW > 0.001 && i < N_TEXT){
       x = tx * (1 - textW) + P.tx[i] * textW;
       y = ty * (1 - textW) + P.ty[i] * textW;
-      sz = tsz * (1 - textW) + (P.sz[i] * 1.05) * textW;
-      al = tal * (1 - textW) + 0.92 * textW;
+      sz = tsz * (1 - textW) + (P.sz[i] * 1.05 * numBoost) * textW;
+      al = tal * (1 - textW) + 1.0 * textW;
+
+      /* 暖白高光：数字粒子向暖白混合，在金色树体前形成清晰描边（仅手机竖屏） */
+      var mixK = LAY.portraitPhone ? 0.62 * textW : 0;
+      cr = cr * (1 - mixK) + 1.0 * mixK;
+      cg = cg * (1 - mixK) + 0.965 * mixK;
+      cb = cb * (1 - mixK) + 0.88 * mixK;
+
+      /* 稀疏大粒子形成柔光晕（仅手机竖屏） */
+      if(LAY.portraitPhone && (i % 6) === 0){
+        sz *= 1.75;
+        al *= 0.55;
+      }
+    }
+    else if(dimTree < 1){
+      /* 倒计时期间树体压暗，让数字成为视觉焦点 */
+      al *= dimTree;
     }
 
     /* 星云扩散 */
@@ -973,9 +1038,9 @@ function updateParticles(time){
     var o = i * 7;
     ptData[o]     = x;
     ptData[o + 1] = y;
-    ptData[o + 2] = colBuf[i * 3];
-    ptData[o + 3] = colBuf[i * 3 + 1];
-    ptData[o + 4] = colBuf[i * 3 + 2];
+    ptData[o + 2] = cr;
+    ptData[o + 3] = cg;
+    ptData[o + 4] = cb;
     ptData[o + 5] = sz;
     ptData[o + 6] = clamp(al, 0, 1);
   }
@@ -998,6 +1063,9 @@ function drawGL(time){
   gl.uniform1f(bgLoc.u_aspect, H / W);
   gl.uniform1f(bgLoc.u_burst, ST.burst);
   gl.uniform1f(bgLoc.u_horizon, 1.0);
+  gl.uniform1f(bgLoc.u_arcBase, LAY.arcBase);
+  gl.uniform1f(bgLoc.u_arcK, LAY.arcK);
+  gl.uniform1f(bgLoc.u_treeTop, LAY.treeTop);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 
   /* --- 粒子 --- */
@@ -1081,8 +1149,8 @@ function draw2D(time){
   }
 
   /* 弧形地平线 */
-  var arcBase = cy + 0.30 * unit;
-  var arcK = 0.62 * unit;
+  var arcBase = cy - LAY.arcBase * unit;
+  var arcK = LAY.arcK * unit;
   ctx2d.beginPath();
   ctx2d.moveTo(0, h);
   for(var px = 0; px <= w; px += 4){
@@ -1120,11 +1188,16 @@ function draw2D(time){
   var breathe = 0.78 + 0.22 * Math.sin(time * 1.7);
   var grow = ST.grow;
   var BASE = CFG.TREE_BASE, HGT = CFG.TREE_H, RMAX = CFG.TREE_R;
+  var PK = 0.55 * (0.36 / (RMAX || 0.36));
   var xScale = LAY.xScale;
 
   ctx2d.globalCompositeOperation = 'lighter';
 
   var step = QUALITY.tier === 0 ? 2 : 1;
+  var textW2 = ST.textW;
+  var isCount2 = (ST.phase === 'count') && LAY.portraitPhone;
+  var dimTree2 = isCount2 ? (1 - 0.40 * textW2) : 1;
+  var numBoost2 = LAY.portraitPhone ? 1.4 : 1.0;
   for(var i = 0; i < N; i += step){
     var t = P.t[i];
     var ang = P.ang0[i] + flow * P.spin[i];
@@ -1132,7 +1205,7 @@ function draw2D(time){
     var wx = Math.cos(ang) * rad * xScale;
     var wy = BASE + t * HGT * grow;
     var wz = Math.sin(ang) * rad;
-    var persp = 1 / (1 + wz * 0.55);
+    var persp = 1 / (1 + wz * PK);
 
     var px3 = cx + wx * persp * unit;
     var py3 = cy - wy * unit;
@@ -1140,12 +1213,32 @@ function draw2D(time){
     var a3 = clamp(P.al[i] * (0.55 + 0.45 * persp) * breathe, 0, 1);
 
     var c = goldColor(t);
+    var rr = c[0], gg = c[1], bb = c[2];
+
+    /* 文字聚合（与 GL 路径一致：放大提亮 + 暖白高光） */
+    if(textW2 > 0.001 && i < N_TEXT){
+      px3 = px3 * (1 - textW2) + (cx + P.tx[i] * unit) * textW2;
+      py3 = py3 * (1 - textW2) + (cy - P.ty[i] * unit) * textW2;
+      r3 = r3 * (1 - textW2) + Math.max(0.8, P.sz[i] * 0.62 * numBoost2) * textW2;
+      a3 = a3 * (1 - textW2) + 1.0 * textW2;
+
+      var mk2 = LAY.portraitPhone ? 0.62 * textW2 : 0;
+      rr = rr * (1 - mk2) + 1.0 * mk2;
+      gg = gg * (1 - mk2) + 0.965 * mk2;
+      bb = bb * (1 - mk2) + 0.88 * mk2;
+
+      if(LAY.portraitPhone && (i % 6) === 0){ r3 *= 1.75; a3 *= 0.55; }
+    }
+    else if(dimTree2 < 1){
+      a3 *= dimTree2;
+    }
+
     ctx2d.beginPath();
     ctx2d.arc(px3, py3, r3, 0, Math.PI * 2);
     ctx2d.fillStyle = 'rgba(' +
-      Math.round(c[0] * 255) + ',' +
-      Math.round(c[1] * 255) + ',' +
-      Math.round(c[2] * 255) + ',' +
+      Math.round(rr * 255) + ',' +
+      Math.round(gg * 255) + ',' +
+      Math.round(bb * 255) + ',' +
       a3.toFixed(3) + ')';
     ctx2d.fill();
   }
@@ -1153,7 +1246,8 @@ function draw2D(time){
   /* 树顶泛光 */
   var topY = cy - (BASE + HGT * grow) * unit;
   var pulse = 0.62 + 0.38 * Math.sin(time * 1.75);
-  var glowR = unit * (0.30 + 0.06 * pulse);
+  var glowBase = LAY.portraitPhone ? 0.17 : 0.30;
+  var glowR = unit * (glowBase + 0.06 * pulse);
   var glow = ctx2d.createRadialGradient(cx, topY, 0, cx, topY, glowR);
   glow.addColorStop(0, 'rgba(255,215,0,' + (0.55 * pulse).toFixed(3) + ')');
   glow.addColorStop(0.45, 'rgba(255,140,0,' + (0.22 * pulse).toFixed(3) + ')');
