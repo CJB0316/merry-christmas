@@ -133,6 +133,23 @@ body{
   text-shadow:0 0 12px rgba(255,215,0,.6),0 0 30px rgba(255,140,0,.34);
 }
 
+/* ---------- 祝福语轮播层（沿用主文案字体/配色/居中位置） ---------- */
+.msg.wish{
+  transition:none;
+  opacity:0;
+}
+.msg.wish .l1{
+  font-size:clamp(22px,5.6vw,52px);
+  line-height:1.42;
+  letter-spacing:.04em;
+  text-indent:0;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  max-width:100%;
+  margin:0 auto;
+}
+
 /* ---------- 控制按钮 ---------- */
 .ctrl{
   position:fixed;
@@ -238,6 +255,7 @@ body{
   .sub{margin-top:2px;font-size:clamp(8px,1.7vh,11px);letter-spacing:.4em;text-indent:.4em}
   .msg .l1{font-size:clamp(28px,12vh,96px)}
   .msg .l2{margin-top:4px;font-size:clamp(10px,2.4vh,15px)}
+  .msg.wish .l1{font-size:clamp(18px,4.4vh,34px);line-height:1.36}
   .hint{bottom:calc(var(--safe-b) + 68px)}
   .note{bottom:calc(var(--safe-b) + 98px)}
   .btn{font-size:11px;padding:0 12px}
@@ -247,6 +265,7 @@ body{
 @media (max-width:340px){
   .title{font-size:clamp(16px,5vw,22px)}
   .msg .l1{font-size:clamp(34px,14vw,52px)}
+  .msg.wish .l1{font-size:clamp(19px,5.4vw,44px)}
   .btn{font-size:10.5px;padding:0 11px}
 }
 
@@ -272,6 +291,10 @@ body{
 <div class="msg" id="msg">
   <div class="l1" id="msgL1">吴芷燕</div>
   <div class="l2" id="msgL2">圣诞快乐 · 愿你被温柔以待</div>
+</div>
+
+<div class="msg wish" id="wish">
+  <div class="l1" id="wishL1"></div>
 </div>
 
 <div class="hint" id="hint">轻触屏幕 · 开启音乐</div>
@@ -788,6 +811,7 @@ var TL = [
   ['count',   3.0],
   ['name',    3.5],
   ['wish',    4.5],
+  ['wish2',  12.5],
   ['nebula',  3.0],
   ['rebirth', 4.0],
   ['hold',    7.0]
@@ -856,6 +880,12 @@ function updateTimeline(time){
     textW = k3 * k4;
     treeW = 1 - textW;
     ST.textKey = 'wish';
+  }
+  else if(phase === 'wish2'){
+    /* 祝福语轮播：粒子保持树形，文字由 DOM 层逐句淡入淡出 */
+    grow = 1;
+    treeW = 1;
+    textW = 0;
   }
   else if(phase === 'nebula'){
     var k5 = easeInOutCubic(pp);
@@ -1340,6 +1370,16 @@ var t0 = 0;
 var rafId = null;
 var msgState = '';
 
+/* 祝福语轮播文案（每句停留约 2.5s，淡入淡出切换） */
+var WISHES = [
+  '愿所求皆如愿，所行化坦途',
+  '愿冬夜有暖灯，长路有归人',
+  '愿星光不负赶路人，岁月不负有心人',
+  '愿你有酒有肉有朋友，无病无灾无烦忧',
+  '吴芷燕，圣诞快乐，新年顺遂'
+];
+var wishIdx = -1;
+
 /* 支持 ?t=秒 从指定时间点开始（便于静态预览/截图） */
 var START_T = 0;
 try{
@@ -1373,6 +1413,33 @@ function updateMsg(){
   }
 }
 
+/* 祝福语轮播：按时间轴进度逐句淡入淡出 */
+function updateWish(){
+  var el = byId('wish');
+  if(!el) return;
+
+  if(ST.phase !== 'wish2'){
+    if(el.style.opacity !== '0') el.style.opacity = '0';
+    return;
+  }
+
+  var n = WISHES.length;
+  var p = clamp(ST.pp, 0, 1) * n;
+  var idx = Math.min(n - 1, Math.floor(p));
+  var sub = p - idx;
+
+  var aIn  = easeInOutCubic(clamp(sub / 0.16, 0, 1));
+  var aOut = 1 - easeInOutCubic(clamp((sub - 0.84) / 0.16, 0, 1));
+  var a = aIn * aOut;
+
+  if(idx !== wishIdx){
+    wishIdx = idx;
+    var l1 = byId('wishL1');
+    if(l1) l1.textContent = WISHES[idx];
+  }
+  el.style.opacity = a.toFixed(3);
+}
+
 function loop(now){
   if(!t0) t0 = now;
   var time = START_T > 0 ? START_T : (now - t0) / 1000;
@@ -1388,6 +1455,7 @@ function loop(now){
   }else{
     updateTimeline(time);
     updateMsg();
+    updateWish();
   }
 
   if(GL_OK){
