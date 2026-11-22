@@ -13,13 +13,26 @@
   --orange:#FF8C00;
   --sand:#C2B280;
   --sand-lit:#EFE4D1;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+  --content-max:1180px;
+  --pad-x:clamp(14px,4vw,40px);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{
-  width:100%;height:100%;overflow:hidden;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  max-width:100%;
+  overflow:hidden;
   background:var(--bg);
+  overscroll-behavior:none;
 }
 body{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
   font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,sans-serif;
   color:var(--warm);
   -webkit-font-smoothing:antialiased;
@@ -27,6 +40,8 @@ body{
   -webkit-tap-highlight-color:transparent;
   -webkit-user-select:none;user-select:none;
   touch-action:manipulation;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
 }
 #gl,#fx2d,#snow{
   position:fixed;top:0;left:0;
@@ -42,9 +57,13 @@ body{
   position:fixed;top:0;left:0;right:0;
   z-index:3;pointer-events:none;
   display:flex;flex-direction:column;align-items:center;
+  padding-top:calc(var(--safe-t) + clamp(14px,4.6vh,54px));
+  padding-left:calc(var(--safe-l) + var(--pad-x));
+  padding-right:calc(var(--safe-r) + var(--pad-x));
+  max-width:100%;
 }
 .title{
-  margin-top:clamp(22px,6.5vh,58px);
+  margin-top:0;
   font-family:"Segoe Script","Brush Script MT","Lucida Handwriting","Apple Chancery","Snell Roundhand",cursive;
   font-size:clamp(19px,4.4vw,38px);
   font-weight:400;
@@ -78,10 +97,16 @@ body{
 
 /* ---------- 粒子文字对应的可读文字层 ---------- */
 .msg{
-  position:fixed;left:0;right:0;top:50%;
-  transform:translateY(-50%);
+  position:fixed;
+  left:50%;
+  top:50%;
+  top:50dvh;
+  width:min(100%,var(--content-max));
+  transform:translate(-50%,-50%);
   z-index:4;pointer-events:none;
   text-align:center;
+  padding-left:calc(var(--safe-l) + var(--pad-x));
+  padding-right:calc(var(--safe-r) + var(--pad-x));
   opacity:0;
   transition:opacity .85s cubic-bezier(.22,.61,.36,1);
 }
@@ -111,11 +136,12 @@ body{
 /* ---------- 控制按钮 ---------- */
 .ctrl{
   position:fixed;
-  right:clamp(13px,3vw,26px);
-  bottom:clamp(15px,3.2vh,32px);
+  right:calc(var(--safe-r) + clamp(12px,2.8vw,28px));
+  bottom:calc(var(--safe-b) + clamp(12px,2.8vh,30px));
   z-index:6;
   display:flex;
-  gap:9px;
+  gap:clamp(8px,1.6vw,12px);
+  max-width:calc(100% - 2 * var(--pad-x));
 }
 .btn{
   -webkit-appearance:none;appearance:none;
@@ -123,10 +149,17 @@ body{
   background:rgba(255,215,0,.055);
   color:var(--gold);
   font-family:inherit;
-  font-size:clamp(10px,2.3vw,12.5px);
+  font-size:clamp(11px,2.4vw,13px);
   letter-spacing:.14em;
   text-indent:.14em;
-  padding:9px 15px;
+  min-height:44px;
+  min-width:44px;
+  padding:0 clamp(14px,3.2vw,20px);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  white-space:nowrap;
   border-radius:999px;
   cursor:pointer;
   -webkit-backdrop-filter:blur(6px);
@@ -153,8 +186,11 @@ body{
 
 /* ---------- 提示 ---------- */
 .hint{
-  position:fixed;left:0;right:0;
-  bottom:clamp(62px,11.5vh,104px);
+  position:fixed;
+  left:50%;
+  width:min(100%,var(--content-max));
+  transform:translateX(-50%);
+  bottom:calc(var(--safe-b) + clamp(62px,11.5vh,104px));
   z-index:5;pointer-events:none;
   text-align:center;
   font-size:clamp(9px,2.1vw,11.5px);
@@ -168,8 +204,11 @@ body{
 
 /* ---------- 降级提示 ---------- */
 .note{
-  position:fixed;left:0;right:0;
-  bottom:clamp(96px,17vh,150px);
+  position:fixed;
+  left:50%;
+  width:min(100%,var(--content-max));
+  transform:translateX(-50%);
+  bottom:calc(var(--safe-b) + clamp(96px,17vh,150px));
   z-index:5;pointer-events:none;
   text-align:center;
   font-size:clamp(9px,2vw,11px);
@@ -179,6 +218,37 @@ body{
   transition:opacity .8s ease;
 }
 .note.on{opacity:1}
+
+/* ---------- 平板 / 桌面：加大留白、限制内容最大宽度 ---------- */
+@media (min-width:768px){
+  :root{--content-max:1040px;--pad-x:clamp(28px,5vw,64px)}
+  .hud{padding-top:calc(var(--safe-t) + clamp(26px,5.2vh,64px))}
+}
+@media (min-width:1280px){
+  :root{--content-max:1180px}
+}
+@media (min-width:1920px){
+  :root{--content-max:1320px}
+}
+
+/* ---------- 手机横屏 / 矮屏：压缩纵向占位 ---------- */
+@media (max-height:560px) and (orientation:landscape){
+  .hud{padding-top:calc(var(--safe-t) + 10px)}
+  .title{font-size:clamp(15px,3.4vh,26px)}
+  .sub{margin-top:2px;font-size:clamp(8px,1.7vh,11px);letter-spacing:.4em;text-indent:.4em}
+  .msg .l1{font-size:clamp(28px,12vh,96px)}
+  .msg .l2{margin-top:4px;font-size:clamp(10px,2.4vh,15px)}
+  .hint{bottom:calc(var(--safe-b) + 68px)}
+  .note{bottom:calc(var(--safe-b) + 98px)}
+  .btn{font-size:11px;padding:0 12px}
+}
+
+/* ---------- 超窄屏 ---------- */
+@media (max-width:340px){
+  .title{font-size:clamp(16px,5vw,22px)}
+  .msg .l1{font-size:clamp(34px,14vw,52px)}
+  .btn{font-size:10.5px;padding:0 11px}
+}
 
 /* ---------- 无障碍：减少动态 ---------- */
 @media (prefers-reduced-motion: reduce){
@@ -234,14 +304,20 @@ try{
 }catch(e){ REDUCED = false; }
 
 var UA = navigator.userAgent || '';
-var IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile|HarmonyOS/i.test(UA) ||
-                Math.min(window.innerWidth, window.innerHeight) < 700;
+var IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
+var UA_MOBILE = /Android|iPhone|iPad|iPod|Mobile|HarmonyOS/i.test(UA);
+var IS_MOBILE = UA_MOBILE || Math.min(window.innerWidth, window.innerHeight) < 700;
+
+/* 视口变化后重新判定（旋转 / 分屏 / 缩放） */
+function isMobileNow(){
+  var s = vpSize();
+  return UA_MOBILE || Math.min(s.w, s.h) < 700;
+}
 
 /* ============================================================
    1. 全局配置
    ============================================================ */
 var CFG = {
-  N: IS_MOBILE ? 1500 : 3400,
   TEXT_RATIO: 0.72,
   TREE_BASE: -0.92,
   TREE_H: 1.78,
@@ -256,9 +332,98 @@ var snowCv = byId('snow');
 var gl = null;
 var GL_OK = false;
 
+/* ---------- 视口尺寸（兼容 iOS 地址栏 / 安全区 / 缩放） ---------- */
+function vpSize(){
+  var de = document.documentElement;
+  var w = de.clientWidth || window.innerWidth || 1;
+  var h = de.clientHeight || window.innerHeight || 1;
+  if(!w || !h){
+    w = window.innerWidth || 1;
+    h = window.innerHeight || 1;
+  }
+  return { w: Math.max(1, Math.round(w)), h: Math.max(1, Math.round(h)) };
+}
+
+/* ---------- 设备分级：粒子数量 / DPR 上限 ---------- */
+var QUALITY = { tier: 2, N: 3400, dprMax: 2 };
+
+function detectQuality(){
+  var s = vpSize();
+  var area = s.w * s.h;
+  var cores = navigator.hardwareConcurrency || 4;
+  var mem = navigator.deviceMemory || 4;
+  var tier = 2;
+
+  if(area < 900000) tier = 1;
+  if(area < 300000) tier = 0;
+  if(area > 1500000 && cores >= 8) tier = 2;
+  if(cores <= 4 && tier > 1) tier = 1;
+  if(cores <= 2 && tier > 0) tier = 0;
+  if(mem <= 2 && tier > 0) tier = 0;
+
+  var n, dprMax;
+  if(tier === 0){ n = 1200; dprMax = 1.5; }
+  else if(tier === 1){ n = 2000; dprMax = 1.75; }
+  else { n = 3400; dprMax = 2; }
+
+  if(isMobileNow() && dprMax > 1.5) dprMax = 1.5;
+
+  QUALITY.tier = tier;
+  QUALITY.N = n;
+  QUALITY.dprMax = dprMax;
+  return QUALITY;
+}
+
 function dprCap(){
   var d = window.devicePixelRatio || 1;
-  return IS_MOBILE ? Math.min(d, 1.5) : Math.min(d, 2);
+  return Math.min(d, QUALITY.dprMax || 2);
+}
+
+/* ---------- 布局：树体 / 地平线 / 文字宽度随视口等比适配 ---------- */
+var LAY = {
+  w: 0, h: 0, aspect: 1, xScale: 1,
+  base: -0.92, hgt: 1.78, rmax: 0.52,
+  unit: 1, cx: 0, cy: 0,
+  textW: 1.24
+};
+
+function computeLayout(){
+  var s = vpSize();
+  var w = s.w, h = s.h;
+  var aspect = w / h;
+  if(!isFinite(aspect) || aspect <= 0) aspect = 1;
+
+  var xScale = clamp(aspect, 0.72, 1.0);
+
+  /* 顶部标题 / 底部按钮占位（NDC 半高比例） */
+  var topPad = 0.16, botPad = 0.12;
+  if(h < 560 && aspect > 1.2){ topPad = 0.13; botPad = 0.10; }
+  else if(aspect > 1.6){ topPad = 0.14; botPad = 0.11; }
+
+  var availTop = 1 - 2 * topPad;
+  var availBot = -1 + 2 * botPad;
+  var availH = Math.max(0.6, availTop - availBot);
+
+  var hgt = Math.min(CFG.TREE_H, availH * 0.96);
+  var base = availBot + (availH - hgt) * 0.35;
+
+  /* 树宽不超过视口宽度的 46%（NDC 半宽） */
+  var rmax = Math.min(CFG.TREE_R, 0.46 / xScale);
+
+  /* 粒子文字宽度：宽屏限制最大像素宽度，避免无限放大 */
+  var textW = Math.min(1.24, (2 * 1100) / w);
+  if(textW < 0.72) textW = 0.72;
+
+  LAY.w = w; LAY.h = h; LAY.aspect = aspect;
+  LAY.xScale = xScale;
+  LAY.base = base; LAY.hgt = hgt; LAY.rmax = rmax;
+  LAY.unit = h / 2; LAY.cx = w / 2; LAY.cy = h / 2;
+  LAY.textW = textW;
+
+  CFG.TREE_BASE = base;
+  CFG.TREE_H = hgt;
+  CFG.TREE_R = rmax;
+  return LAY;
 }
 
 /* ============================================================
@@ -434,7 +599,7 @@ function initGL(){
 
   ptVBO = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, ptVBO);
-  gl.bufferData(gl.ARRAY_BUFFER, (CFG.N * 7) * 4, gl.DYNAMIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, (N * 7) * 4, gl.DYNAMIC_DRAW);
 
   gl.disable(gl.DEPTH_TEST);
   gl.enable(gl.BLEND);
@@ -444,7 +609,8 @@ function initGL(){
 /* ============================================================
    3. 粒子系统
    ============================================================ */
-var N = CFG.N;
+detectQuality();
+var N = QUALITY.N;
 var N_TEXT = Math.floor(N * CFG.TEXT_RATIO);
 
 var P = {
@@ -493,7 +659,7 @@ function initParticles(){
     P.ang0[i] = Math.random() * Math.PI * 2;
     P.rj[i]   = 0.80 + Math.random() * 0.40;
     P.spin[i] = 0.55 + Math.random() * 0.95;
-    P.sz[i]   = (IS_MOBILE ? 1.7 : 2.1) + Math.random() * 2.3;
+    P.sz[i]   = (QUALITY.tier === 0 ? 1.7 : (QUALITY.tier === 1 ? 1.9 : 2.1)) + Math.random() * 2.3;
     P.al[i]   = 0.42 + Math.random() * 0.58;
 
     var c = goldColor(t);
@@ -580,11 +746,9 @@ var FONT_CN = '"STKaiti","KaiTi","Kaiti SC","Songti SC","Microsoft YaHei",serif'
 var FONT_NUM = '"Helvetica Neue","Arial","Microsoft YaHei",sans-serif';
 
 function buildTextSets(){
-  var aspect = (cv.clientWidth || window.innerWidth) / (cv.clientHeight || window.innerHeight);
-  if(!isFinite(aspect) || aspect <= 0) aspect = 1;
-
-  var step = IS_MOBILE ? 4 : 3;
-  var fs = IS_MOBILE ? 150 : 200;
+  var aspect = LAY.aspect;
+  var step = QUALITY.tier === 0 ? 4 : 3;
+  var fs = QUALITY.tier === 0 ? 150 : 200;
 
   TEXT_SETS = {};
 
@@ -592,16 +756,16 @@ function buildTextSets(){
   var nums = ['3', '2', '1'];
   for(var i = 0; i < nums.length; i++){
     var sn = sampleText(nums[i], fs * 1.35, FONT_NUM, step + 1);
-    if(sn) TEXT_SETS['num' + i] = mapPts(sn, 0.42, aspect, 0.02);
+    if(sn) TEXT_SETS['num' + i] = mapPts(sn, Math.min(0.42, LAY.textW * 0.34), aspect, 0.02);
   }
 
   /* 姓名 */
   var sName = sampleText('吴芷燕', fs, FONT_CN, step);
-  if(sName) TEXT_SETS['name'] = mapPts(sName, 1.24, aspect, 0.02);
+  if(sName) TEXT_SETS['name'] = mapPts(sName, LAY.textW, aspect, 0.02);
 
   /* 祝福主文案 */
   var sWish = sampleText('圣诞快乐', fs, FONT_CN, step);
-  if(sWish) TEXT_SETS['wish'] = mapPts(sWish, 1.24, aspect, 0.02);
+  if(sWish) TEXT_SETS['wish'] = mapPts(sWish, LAY.textW, aspect, 0.02);
 }
 
 function applyTextSet(key){
@@ -731,11 +895,7 @@ var ptData = new Float32Array(N * 7);
 var STRIDE = 7 * 4;
 
 function updateParticles(time){
-  var W = cv.clientWidth || window.innerWidth;
-  var H = cv.clientHeight || window.innerHeight;
-  var aspect = W / H;
-  if(!isFinite(aspect) || aspect <= 0) aspect = 1;
-  var xScale = clamp(aspect, 0.72, 1.0);
+  var xScale = LAY.xScale;
 
   var flow = time * 0.42;
   var breathe = 0.78 + 0.22 * Math.sin(time * 1.7);
@@ -845,7 +1005,7 @@ function init2D(){
 function resize2D(){
   if(!ctx2d) return;
   var dpr = dprCap();
-  var w = window.innerWidth, h = window.innerHeight;
+  var w = LAY.w || window.innerWidth, h = LAY.h || window.innerHeight;
   D2.dpr = dpr;
   D2.w = w;
   D2.h = h;
@@ -878,7 +1038,7 @@ function draw2D(time){
     seed = (seed * 1103515245 + 12345) & 0x7fffffff;
     return seed / 0x7fffffff;
   }
-  var starN = IS_MOBILE ? 110 : 200;
+  var starN = QUALITY.tier === 0 ? 110 : (QUALITY.tier === 1 ? 160 : 200);
   for(var s = 0; s < starN; s++){
     var sx = rnd() * w;
     var sy = rnd() * h * 0.92;
@@ -930,11 +1090,11 @@ function draw2D(time){
   var breathe = 0.78 + 0.22 * Math.sin(time * 1.7);
   var grow = ST.grow;
   var BASE = CFG.TREE_BASE, HGT = CFG.TREE_H, RMAX = CFG.TREE_R;
-  var xScale = clamp(w / h, 0.72, 1.0);
+  var xScale = LAY.xScale;
 
   ctx2d.globalCompositeOperation = 'lighter';
 
-  var step = IS_MOBILE ? 2 : 1;
+  var step = QUALITY.tier === 0 ? 2 : 1;
   for(var i = 0; i < N; i += step){
     var t = P.t[i];
     var ang = P.ang0[i] + flow * P.spin[i];
@@ -1113,7 +1273,7 @@ function snowBurst(){
 
   var dpr = dprCap();
   var w = snowCv.width, h = snowCv.height;
-  var count = IS_MOBILE ? 70 : 130;
+  var count = QUALITY.tier === 0 ? 70 : (QUALITY.tier === 1 ? 100 : 130);
 
   for(var i = 0; i < count; i++){
     flakes.push({
@@ -1240,10 +1400,40 @@ function loop(now){
   rafId = requestAnimationFrame(loop);
 }
 
-function resizeAll(){
+function rebuildParticles(newN){
+  if(newN === N) return;
+  N = newN;
+  N_TEXT = Math.floor(N * CFG.TEXT_RATIO);
+
+  P = {
+    t:    new Float32Array(N),
+    ang0: new Float32Array(N),
+    rj:   new Float32Array(N),
+    spin: new Float32Array(N),
+    sz:   new Float32Array(N),
+    al:   new Float32Array(N),
+    tx:   new Float32Array(N),
+    ty:   new Float32Array(N),
+    cx:   new Float32Array(N),
+    cy:   new Float32Array(N)
+  };
+  posBuf   = new Float32Array(N * 2);
+  colBuf   = new Float32Array(N * 3);
+  sizeBuf  = new Float32Array(N);
+  alphaBuf = new Float32Array(N);
+  ptData   = new Float32Array(N * 7);
+
+  initParticles();
+
+  if(GL_OK && gl && ptVBO){
+    gl.bindBuffer(gl.ARRAY_BUFFER, ptVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, (N * 7) * 4, gl.DYNAMIC_DRAW);
+  }
+}
+
+function applyCanvasSize(){
   var dpr = dprCap();
-  var w = window.innerWidth;
-  var h = window.innerHeight;
+  var w = LAY.w, h = LAY.h;
 
   if(GL_OK){
     cv.width  = Math.round(w * dpr);
@@ -1257,9 +1447,38 @@ function resizeAll(){
   snowCv.height = Math.round(h * dpr);
   snowCv.style.width  = w + 'px';
   snowCv.style.height = h + 'px';
+}
 
-  buildTextSets();
-  if(curTextKey && TEXT_SETS[curTextKey]) applyTextSet(curTextKey);
+var resizeTimer = null;
+var lastKey = '';
+
+function resizeAll(immediate){
+  computeLayout();
+  detectQuality();
+
+  var key = LAY.w + 'x' + LAY.h + '@' + QUALITY.tier;
+  var changed = key !== lastKey;
+  lastKey = key;
+
+  applyCanvasSize();
+
+  if(changed){
+    rebuildParticles(QUALITY.N);
+    buildTextSets();
+    if(curTextKey && TEXT_SETS[curTextKey]) applyTextSet(curTextKey);
+    if(flakes && flakes.length) flakes.length = 0;
+  }
+
+  if(immediate) return;
+
+  if(resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function(){
+    resizeTimer = null;
+    computeLayout();
+    applyCanvasSize();
+    buildTextSets();
+    if(curTextKey && TEXT_SETS[curTextKey]) applyTextSet(curTextKey);
+  }, 160);
 }
 
 function bindButtons(){
@@ -1288,10 +1507,19 @@ function bindButtons(){
     document.removeEventListener('pointerdown', firstTouch);
     if(!musicPlaying) musicOn();
   }
-  document.addEventListener('pointerdown', firstTouch);
+  if(window.PointerEvent){
+    document.addEventListener('pointerdown', firstTouch);
+  }else{
+    document.addEventListener('touchstart', firstTouch, { passive: true });
+    document.addEventListener('mousedown', firstTouch);
+  }
 }
 
 function boot(){
+  computeLayout();
+  detectQuality();
+  N = QUALITY.N;
+  N_TEXT = Math.floor(N * CFG.TEXT_RATIO);
   initParticles();
   buildTextSets();
 
@@ -1325,9 +1553,17 @@ function boot(){
     if(msg) msg.classList.add('on');
   }
 
-  window.addEventListener('resize', resizeAll);
+  window.addEventListener('resize', function(){ resizeAll(false); }, { passive: true });
   window.addEventListener('orientationchange', function(){
-    setTimeout(resizeAll, 260);
+    resizeAll(true);
+    setTimeout(function(){ resizeAll(false); }, 120);
+    setTimeout(function(){ resizeAll(false); }, 360);
+  });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', function(){ resizeAll(false); }, { passive: true });
+  }
+  window.addEventListener('pageshow', function(e){
+    if(e && e.persisted) resizeAll(false);
   });
 
   rafId = requestAnimationFrame(loop);
